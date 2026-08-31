@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93e5f4feb7c8e5841a18c146e21b5497, type: 3}
   m_Name: TestFishStatus
   m_EditorClassIdentifier: Assembly-CSharp::MiniGame.Fish.FishStatus
-  name: "\u3055\u304B\u306A1:30:3"
+  fishName: 
   level: 1
   rate: 30
   profile: "\u30C6\u30B9\u30C8\u7528\u3059\u3066\u30FC\u305F\u3059"
-  fishImage: {fileID: 1414772401, guid: 38b2a2a4cb0bbf54dbe44ec6e709a4ab, type: 3}
+  fishImage: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
   fishSpeed: 3
