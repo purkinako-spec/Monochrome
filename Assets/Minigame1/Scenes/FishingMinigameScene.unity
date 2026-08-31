@@ -1017,6 +1017,7 @@ GameObject:
   m_Component:
   - component: {fileID: 582948403}
   - component: {fileID: 582948402}
+  - component: {fileID: 582948404}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1044,14 +1045,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1b67335aaa0c99a4bba92f7c078e8034, type: 2}
   - {fileID: 11400000, guid: f443ebfe0a4414c48ab5f2141e0bfd02, type: 2}
   LureGameObject: {fileID: 1876844550}
-  fishObject: {fileID: 0}
-  lureObject: {fileID: 0}
-  inlineDiatance: 0
-  hituyouPoint: 0
-  reedingGameObject: {fileID: 0}
-  targetGameObject: {fileID: 0}
-  centerGameObject: {fileID: 0}
-  distance: 0
+  fishObject: {fileID: 142046857}
+  lureObject: {fileID: 1876844550}
+  inlineDistance: 1
+  hituyouPoint: 1
+  reedingGameObject: {fileID: 2036938848}
+  targetGameObject: {fileID: 1075777062}
+  centerGameObject: {fileID: 598518900}
+  maxReedingDistance: 21.67
+  coolTime: 1
 --- !u!4 &582948403
 Transform:
   m_ObjectHideFlags: 0
@@ -1067,6 +1069,56 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &582948404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582948401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 0ca84dc6bb1f538499fc5c997a41190d, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 08015bc0-d857-4c6f-a1c9-f9409ada710f
+    m_ActionName: 'FishMiniGameActionMaps/WatingForBiteMove[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 582948402}
+        m_TargetAssemblyTypeName: FishingMinigameManager, Assembly-CSharp
+        m_MethodName: OnAction
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 0ca70908-3d4b-424a-a6af-c30e13176b80
+    m_ActionName: 'Reeding/action[/Keyboard/f,/Mouse/press]'
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Reeding
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &598518900
 GameObject:
   m_ObjectHideFlags: 0
@@ -1355,6 +1407,11 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &1075777062 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8063251702683903466, guid: f6d91ba9ac341ad459374e29938ad39e, type: 3}
+  m_PrefabInstance: {fileID: 516325682}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1446955943
 GameObject:
   m_ObjectHideFlags: 0
@@ -1805,7 +1862,7 @@ GameObject:
   - component: {fileID: 2036938850}
   - component: {fileID: 2036938849}
   m_Layer: 5
-  m_Name: a
+  m_Name: ReedingGameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

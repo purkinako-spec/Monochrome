@@ -3,6 +3,8 @@ using NUnit.Framework;
 using TMPro;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class FishingMinigameManager : MonoBehaviour
 {
@@ -31,14 +33,16 @@ public class FishingMinigameManager : MonoBehaviour
 
             case FishingMiniGameStates.Hooked:
                 ChangeMoveObjectsState(false);
+                StartReeding();
                 fishingMiniGameState = FishingMiniGameStates.Reeling;
                 break;
 
             case FishingMiniGameStates.Reeling:
-
+                Reeding();
                 break;
 
             case FishingMiniGameStates.Finished:
+                EndFishingMiniGame();
                 break;
         }
     }
@@ -115,14 +119,16 @@ public class FishingMinigameManager : MonoBehaviour
 
     [SerializeField] private GameObject fishObject;
     [SerializeField] private GameObject lureObject;
-    [SerializeField] private float inlineDiatance;
+    [SerializeField] private float inlineDistance;
     [SerializeField] private float hituyouPoint;
     private float currentPoint = 0;
     private void ChackPoint()
     {
-        if(Vector2.Distance(fishObject.transform.position,lureObject.transform.position) <= inlineDiatance)
+        if(Vector2.Distance(fishObject.transform.position,lureObject.transform.position) <= inlineDistance)
         {
             currentPoint += Time.deltaTime;
+
+            Debug.Log(currentPoint);
         }
 
         if(currentPoint >= hituyouPoint)
@@ -147,11 +153,55 @@ public class FishingMinigameManager : MonoBehaviour
     [SerializeField] private GameObject reedingGameObject;
     [SerializeField] private GameObject targetGameObject;
     [SerializeField] private GameObject centerGameObject;
-    [SerializeField] private float distance;
+
+    private bool isAction = false;
+    private float currentReedingPoint = 0;
+    private float fishReedingPoint = 0;
+    [SerializeField] private float maxReedingDistance = 1;
+    [SerializeField] private float coolTime = 0;
+    private float coolDown = 0;
+
+    private void StartReeding()
+    {
+        reedingGameObject.SetActive(true);
+        targetGameObject.SetActive(true);
+        fishReedingPoint = fishStatus.level;
+    }
+
+    private void EndtReeding()
+    {
+        reedingGameObject.SetActive(false);
+        targetGameObject.SetActive(false);
+        currentReedingPoint = 0;
+        fishingMiniGameState = FishingMiniGameStates.Finished;
+    }
 
     private void Reeding()
     {
+        if (isAction && coolDown == 0)
+        {
+            isAction = false;
 
+            coolDown = coolTime;
+
+            currentReedingPoint += Vector2.Distance(reedingGameObject.transform.position, targetGameObject.transform.position) / maxReedingDistance;
+            Debug.Log(currentReedingPoint);
+
+            if(currentReedingPoint > fishReedingPoint)
+            {
+                EndtReeding();
+            }
+        }
+
+        if(coolDown > 0)coolDown -= Time.deltaTime;
+        if (coolDown < 0) coolDown = 0;
+        
+
+    }
+
+    public void OnAction(InputAction.CallbackContext context)
+    {
+        isAction = true;
     }
 
 
@@ -159,7 +209,9 @@ public class FishingMinigameManager : MonoBehaviour
     public void EndFishingMiniGame()
     {
         // ’Þ‚èã‚°‰‰o‚ÅI—¹
+        Debug.Log("’Þ‚Á‚½");
         
+        SceneManager.UnloadSceneAsync("FishingMinigameScene");
     }
 
 }

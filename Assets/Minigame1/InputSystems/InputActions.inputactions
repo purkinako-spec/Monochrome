@@ -14,15 +14,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "action",
-                    "type": "Button",
-                    "id": "18a21af4-76b6-493e-8df2-c7654da7991b",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -135,12 +126,29 @@
                     "action": "WatingForBiteMove",
                     "isComposite": false,
                     "isPartOfComposite": true
-                },
+                }
+            ]
+        },
+        {
+            "name": "Reeding",
+            "id": "51a36630-2102-4830-8aaf-bf5995e78b12",
+            "actions": [
+                {
+                    "name": "action",
+                    "type": "Button",
+                    "id": "0ca70908-3d4b-424a-a6af-c30e13176b80",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
                 {
                     "name": "",
-                    "id": "6cfabc30-92cf-4326-98e1-65ad55a9285c",
+                    "id": "884b52b9-f986-466b-b52e-9ef0feb07820",
                     "path": "<Keyboard>/f",
-                    "interactions": "",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "",
                     "action": "action",
@@ -149,9 +157,9 @@
                 },
                 {
                     "name": "",
-                    "id": "982d73e1-bf52-47ed-abf7-d08736f011ac",
+                    "id": "a454ea0e-763e-411c-b804-6b18585675b2",
                     "path": "<Mouse>/press",
-                    "interactions": "",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "",
                     "action": "action",
