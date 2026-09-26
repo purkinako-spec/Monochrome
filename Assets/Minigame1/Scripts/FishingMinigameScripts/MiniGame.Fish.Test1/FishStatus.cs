@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace MiniGame.Fish
+namespace MiniGame.Fish.Test1
 {
 
     [CreateAssetMenu(fileName = "NewFishStatus", menuName = "Fish/FishStatus")]

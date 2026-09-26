@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4563418756163810314}
   - component: {fileID: 2488212533025258630}
-  - component: {fileID: 1818446157905352448}
   - component: {fileID: -4950066702210277404}
+  - component: {fileID: 5043742205788545238}
   m_Layer: 0
   m_Name: Lure
   m_TagString: Untagged
@@ -93,19 +93,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1818446157905352448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 287223861256680583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0af7846e3e378ef44bd71290a456a3b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LureMovement
-  speed: 5
 --- !u!114 &-4950066702210277404
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,7 +120,7 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1818446157905352448}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: LureMovement, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
@@ -147,8 +134,27 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 08015bc0-d857-4c6f-a1c9-f9409ada710f
     m_ActionName: 'FishMiniGameActionMaps/WatingForBiteMove[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d,/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0ca70908-3d4b-424a-a6af-c30e13176b80
+    m_ActionName: 'Reeding/action[/Keyboard/f,/Mouse/press]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: FishMiniGameActionMaps
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &5043742205788545238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 287223861256680583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b351a93aa9e8d804d909e82bc1a3ae40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MiniGame.Fish.Test2.LureMovement
+  speed: 5
+  canInput: 1
+  movableArea: {fileID: 0}

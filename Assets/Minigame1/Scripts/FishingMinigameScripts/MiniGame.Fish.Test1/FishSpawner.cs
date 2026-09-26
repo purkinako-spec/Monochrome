@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MiniGame.Fish
+namespace MiniGame.Fish.Test1
 {
     public class FishSpawner : MonoBehaviour
     {

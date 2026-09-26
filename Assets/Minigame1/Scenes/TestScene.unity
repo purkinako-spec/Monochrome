@@ -514,7 +514,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.52751243, y: 0.00821724}
-    oldSize: {x: 1.82, y: 2.8}
+    oldSize: {x: 1.8233739, y: 2.8}
     newSize: {x: 1.82, y: 2.8}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -877,7 +877,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
-    oldSize: {x: 1.66, y: 2.65}
+    oldSize: {x: 1.6630774, y: 2.65}
     newSize: {x: 1.66, y: 2.65}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -971,7 +971,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49fd26df26f5cbd4c9490d04acab6d4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
-  sceneName: FishingMinigameScene
+  sceneName: FishingMinigameSceneTest2
 --- !u!1 &1742309763
 GameObject:
   m_ObjectHideFlags: 0
