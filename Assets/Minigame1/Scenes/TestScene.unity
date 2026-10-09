@@ -177,6 +177,7 @@ GameObject:
   - component: {fileID: 611836175}
   - component: {fileID: 611836174}
   - component: {fileID: 611836173}
+  - component: {fileID: 611836177}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -271,7 +272,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 4.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -302,6 +303,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &611836177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 611836172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c88f5cead0c0b2a4eb05b5900433f8d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.PixelPerfectCamera
+  m_ComponentVersion: 1
+  m_AssetsPPU: 20
+  m_RefResolutionX: 320
+  m_RefResolutionY: 180
+  m_CropFrame: 0
+  m_GridSnapping: 0
+  m_FilterMode: 0
+  m_UpscaleRT: 0
+  m_PixelSnapping: 0
+  m_CropFrameX: 0
+  m_CropFrameY: 0
+  m_StretchFill: 0
 --- !u!1 &1157618348
 GameObject:
   m_ObjectHideFlags: 0
@@ -513,8 +538,8 @@ BoxCollider2D:
   m_Offset: {x: -0.018200338, y: 0.024477635}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.52751243, y: 0.00821724}
-    oldSize: {x: 1.8233739, y: 2.8}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 0.875, y: 1.25}
     newSize: {x: 1.82, y: 2.8}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -611,7 +636,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1208040086343421634, guid: 38b2a2a4cb0bbf54dbe44ec6e709a4ab, type: 3}
+  m_Sprite: {fileID: -8656168313596769777, guid: f104b54038278444d81dd880034b6ddf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
