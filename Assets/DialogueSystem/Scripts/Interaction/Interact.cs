@@ -25,7 +25,7 @@ namespace Runtime.Dialogue.Interaction
         [SerializeField] private InputActionReference _interactAction;
 
         [Header("Dialogue View Reference")]
-        [Tooltip("シーン上の IDialogueView 実装オブジェクト (自動取得もしない場合は手動アサイン)")]
+        [Tooltip("シーン上の IDialogueView 実装オブジェクト (未設定の場合は非アクティブ含め自動検索)")]
         [SerializeField] private MonoBehaviour _dialogueViewProvider;
 
         [Header("Debug")]
