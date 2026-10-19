@@ -25,6 +25,7 @@ namespace Runtime.Dialogue.Interaction
         [SerializeField] private InputActionReference _interactAction;
 
         private IInteractable _currentTarget;
+        private IDialogueView _cachedDialogueView;
         private Collider2D[] _overlapBuffer = new Collider2D[10];
 
         private void Awake()
@@ -125,6 +126,7 @@ namespace Runtime.Dialogue.Interaction
 
             if (view != null && DialogueManager.Instance != null)
             {
+                _cachedDialogueView = view;
                 DialogueManager.Instance.RegisterView(view);
                 Debug.Log($"[Interact] DialogueManager に View を登録しました: {view.GetType().Name}");
             }
@@ -143,6 +145,7 @@ namespace Runtime.Dialogue.Interaction
         /// </summary>
         public void SetDialogueView(IDialogueView view) 
         {
+            _cachedDialogueView = view;
             if (DialogueManager.Instance != null)
             {
                 DialogueManager.Instance.RegisterView(view);
