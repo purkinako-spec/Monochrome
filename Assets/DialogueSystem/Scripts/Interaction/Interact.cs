@@ -24,9 +24,6 @@ namespace Runtime.Dialogue.Interaction
         [Tooltip("インタラクト入力アクション (例: 'Interact' または 'Submit')")]
         [SerializeField] private InputActionReference _interactAction;
 
-        [Header("Debug")]
-        [SerializeField] private bool _showGizmos = true;
-
         private IInteractable _currentTarget;
         private Collider2D[] _overlapBuffer = new Collider2D[10];
 
@@ -159,7 +156,6 @@ namespace Runtime.Dialogue.Interaction
 
         private void OnDrawGizmosSelected()
         {
-            if (!_showGizmos) return;
             Gizmos.color = new Color(0f, 1f, 1f, 0.5f);
             Vector3 center = _detectionCenter ? _detectionCenter.position : transform.position;
             Gizmos.DrawWireSphere(center, _detectionRadius);
