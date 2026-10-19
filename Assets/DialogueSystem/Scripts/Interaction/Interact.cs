@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Runtime.Dialogue.Logic;
-using IInteractable = global::IInteractable;
 
 namespace Runtime.Dialogue.Interaction
 {
