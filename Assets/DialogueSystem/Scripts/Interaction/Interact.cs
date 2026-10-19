@@ -32,7 +32,6 @@ namespace Runtime.Dialogue.Interaction
         [SerializeField] private bool _showGizmos = true;
 
         private IInteractable _currentTarget;
-        private IDialogueView _cachedDialogueView;
         private Collider2D[] _overlapBuffer = new Collider2D[10];
 
         private void Awake()
@@ -45,7 +44,9 @@ namespace Runtime.Dialogue.Interaction
                 _interactAction.action.performed += OnInteractInput;
             }
 
-            ResolveDialogueView();
+            // 起動時に View を解決し、DialogueManager (Singleton) に登録しておく
+            // これにより NPC 側で FindObjectOfType する必要がなくなる
+            ResolveAndRegisterDialogueView();
         }
 
         private void OnDestroy()
@@ -62,6 +63,9 @@ namespace Runtime.Dialogue.Interaction
             DetectNearestInteractable();
         }
 
+        /// <summary>
+        /// 範囲内の最近接 IInteractable を検出
+        /// </summary>
         private void DetectNearestInteractable()
         {
             int count = Physics2D.OverlapCircleNonAlloc(_detectionCenter.position, _detectionRadius, _overlapBuffer, _interactableLayer);
@@ -92,6 +96,9 @@ namespace Runtime.Dialogue.Interaction
             }
         }
 
+        /// <summary>
+        /// インタラクト入力検知
+        /// </summary>
         private void OnInteractInput(InputAction.CallbackContext ctx)
         {
             if (_currentTarget != null)
@@ -100,6 +107,9 @@ namespace Runtime.Dialogue.Interaction
             }
         }
 
+        /// <summary>
+        /// ターゲット変更時の処理 (UIプロンプト表示など)
+        /// </summary>
         private void OnTargetChanged(IInteractable newTarget)
         {
             if (newTarget != null)
@@ -112,29 +122,56 @@ namespace Runtime.Dialogue.Interaction
             }
         }
 
-        private void ResolveDialogueView()
+        /// <summary>
+        /// シーンから IDialogueView を探し、DialogueManager に登録する
+        /// </summary>
+        private void ResolveAndRegisterDialogueView()
         {
+            IDialogueView view = null;
+
             if (_dialogueViewProvider != null)
             {
-                _cachedDialogueView = _dialogueViewProvider as IDialogueView;
-                if (_cachedDialogueView == null)
+                view = _dialogueViewProvider as IDialogueView;
+                if (view == null)
                 {
                     Debug.LogWarning($"[_dialogueViewProvider] に IDialogueView が実装されていません: {_dialogueViewProvider.name}");
                 }
             }
             else
             {
-                _cachedDialogueView = FindObjectOfType<MonoBehaviour>(true) as IDialogueView;
+                // 非アクティブ含めて検索
+                view = FindObjectOfType<MonoBehaviour>(true) as IDialogueView;
             }
 
-            if (_cachedDialogueView != null)
+            if (view != null && DialogueManager.Instance != null)
             {
-                Debug.Log($"[Interact] DialogueView をキャッシュしました: {_cachedDialogueView.GetType().Name}");
+                DialogueManager.Instance.RegisterView(view);
+                Debug.Log($"[Interact] DialogueManager に View を登録しました: {view.GetType().Name}");
+            }
+            else if (view == null)
+            {
+                Debug.LogWarning("[Interact] IDialogueView 実装オブジェクトがシーンに見つかりませんでした。");
+            }
+            else
+            {
+                Debug.LogWarning("[Interact] DialogueManager.Instance がまだ存在しません。");
             }
         }
 
-        public void SetDialogueView(IDialogueView view) => _cachedDialogueView = view;
+        /// <summary>
+        /// 外部から View を強制設定する場合用
+        /// </summary>
+        public void SetDialogueView(IDialogueView view) 
+        {
+            if (DialogueManager.Instance != null)
+            {
+                DialogueManager.Instance.RegisterView(view);
+            }
+        }
 
+        /// <summary>
+        /// 現在のターゲット取得 (UI側から参照用)
+        /// </summary>
         public IInteractable CurrentTarget => _currentTarget;
 
         private void OnDrawGizmosSelected()

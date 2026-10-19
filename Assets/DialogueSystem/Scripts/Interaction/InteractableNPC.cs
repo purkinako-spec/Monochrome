@@ -41,23 +41,21 @@ namespace Runtime.Dialogue.Interaction
                 return;
             }
 
+            // View の登録は Interact.cs (Player側) の Awake で完了している想定。
+            // ここでは Manager に View があるかのみチェックし、なければエラーにする（設計上のミスを検知しやすくするため）。
             if (manager.CurrentView == null)
             {
-                var view = FindObjectOfType<MonoBehaviour>(true) as IDialogueView;
-                if (view != null)
-                {
-                    manager.RegisterView(view);
-                }
-                else
-                {
-                    Debug.LogError("IDialogueView を実装したコンポーネントがシーンに見つかりません。", this);
-                    return;
-                }
+                Debug.LogError("DialogueManager に View が登録されていません。Player に Interact コンポーネントがアタッチされ、DialogueViewProvider が設定されているか確認してください。", this);
+                return;
             }
 
-            manager.StartDialogue(_dialogueContainer, OnDialogueEnded);
+            // 開始ノードIDを指定して会話開始 (DialogueManager の新オーバーロードを使用)
+            manager.StartDialogue(_dialogueContainer, _startNodeID, OnDialogueEnded);
         }
 
+        /// <summary>
+        /// 会話終了時のコールバック
+        /// </summary>
         private void OnDialogueEnded()
         {
             Debug.Log($"[{name}] 会話が終了しました。");

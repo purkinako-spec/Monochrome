@@ -74,6 +74,22 @@ namespace Runtime.Dialogue.Logic
             CurrentView?.InitializeView();
         }
 
+        /// <summary>
+        /// 会話開始 (Container指定 + 開始ノードID指定 + 終了コールバック)
+        /// </summary>
+        public void StartDialogue(DialogueContainer container, string startNodeID, Action onEnded = null)
+        {
+            if (container != null)
+            {
+                currentContainer = container;
+            }
+            onDialogueEndedCallback = onEnded;
+            StartDialogue(startNodeID);
+        }
+
+        /// <summary>
+        /// 会話開始 (Container指定 + 終了コールバック) - 既存互換用
+        /// </summary>
         public void StartDialogue(DialogueContainer container, Action onEnded = null)
         {
             if (container != null)
@@ -84,6 +100,9 @@ namespace Runtime.Dialogue.Logic
             StartDialogue(string.Empty);
         }
 
+        /// <summary>
+        /// 会話開始 (ノードIDのみ指定) - 内部処理用
+        /// </summary>
         public void StartDialogue(string startNodeID = "")
         {
             if (currentContainer == null)
