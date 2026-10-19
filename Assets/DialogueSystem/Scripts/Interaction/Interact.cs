@@ -5,8 +5,8 @@ using Runtime.Dialogue.Logic;
 namespace Runtime.Dialogue.Interaction
 {
     /// <summary>
-    /// プレイヤーにアタッチし、周囲の IInteractable を検出・インタラクトするコンポーネント
-    /// DialogueTesting.cs のパターン (RegisterView -> StartDialogue) に準拠
+    /// プレイヤーにアタッチし、周囲の IInteractable を検出・インタラクト入力を伝達するコンポーネント
+    /// View の登録は IDialogueView 実装側 (Awake 等) で DialogueManager.Instance.RegisterView(this) する想定
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class Interact : MonoBehaviour
@@ -24,7 +24,6 @@ namespace Runtime.Dialogue.Interaction
         [SerializeField] private InputActionReference _interactAction;
 
         private IInteractable _currentTarget;
-        private IDialogueView _cachedDialogueView;
         private Collider2D[] _overlapBuffer = new Collider2D[10];
 
         private void Awake()
@@ -36,10 +35,6 @@ namespace Runtime.Dialogue.Interaction
                 _interactAction.action.Enable();
                 _interactAction.action.performed += OnInteractInput;
             }
-
-            // 起動時に View を解決し、DialogueManager (Singleton) に登録しておく
-            // 手動アサインフィールドを廃止し、自動検索 (FindObjectOfType) のみに依存
-            ResolveAndRegisterDialogueView();
         }
 
         private void OnDestroy()
@@ -90,7 +85,7 @@ namespace Runtime.Dialogue.Interaction
         }
 
         /// <summary>
-        /// インタラクト入力検知
+        /// インタラクト入力検知 → 対象の Interact() を呼び出し (会話開始等は対象側で Manager.StartDialogue を叩く)
         /// </summary>
         private void OnInteractInput(InputAction.CallbackContext ctx)
         {
@@ -112,42 +107,6 @@ namespace Runtime.Dialogue.Interaction
             else
             {
                 Debug.Log("[Interact] 対象なし");
-            }
-        }
-
-        /// <summary>
-        /// シーンから IDialogueView を探し、DialogueManager に登録する
-        /// </summary>
-        private void ResolveAndRegisterDialogueView()
-        {
-            // 非アクティブ含めて検索 (手動アサインフィールドは廃止)
-            var view = FindObjectOfType<MonoBehaviour>(true) as IDialogueView;
-
-            if (view != null && DialogueManager.Instance != null)
-            {
-                _cachedDialogueView = view;
-                DialogueManager.Instance.RegisterView(view);
-                Debug.Log($"[Interact] DialogueManager に View を登録しました: {view.GetType().Name}");
-            }
-            else if (view == null)
-            {
-                Debug.LogWarning("[Interact] IDialogueView 実装オブジェクトがシーンに見つかりませんでした。");
-            }
-            else
-            {
-                Debug.LogWarning("[Interact] DialogueManager.Instance がまだ存在しません。");
-            }
-        }
-
-        /// <summary>
-        /// 外部から View を強制設定する場合用 (動的な切り替え等)
-        /// </summary>
-        public void SetDialogueView(IDialogueView view) 
-        {
-            _cachedDialogueView = view;
-            if (DialogueManager.Instance != null)
-            {
-                DialogueManager.Instance.RegisterView(view);
             }
         }
 
