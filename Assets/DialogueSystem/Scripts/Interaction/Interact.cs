@@ -24,10 +24,6 @@ namespace Runtime.Dialogue.Interaction
         [Tooltip("インタラクト入力アクション (例: 'Interact' または 'Submit')")]
         [SerializeField] private InputActionReference _interactAction;
 
-        [Header("Dialogue View Reference")]
-        [Tooltip("シーン上の IDialogueView 実装オブジェクト (未設定の場合は非アクティブ含め自動検索)")]
-        [SerializeField] private MonoBehaviour _dialogueViewProvider;
-
         [Header("Debug")]
         [SerializeField] private bool _showGizmos = true;
 
@@ -45,7 +41,7 @@ namespace Runtime.Dialogue.Interaction
             }
 
             // 起動時に View を解決し、DialogueManager (Singleton) に登録しておく
-            // これにより NPC 側で FindObjectOfType する必要がなくなる
+            // 手動アサインフィールドを廃止し、自動検索 (FindObjectOfType) のみに依存
             ResolveAndRegisterDialogueView();
         }
 
@@ -127,21 +123,8 @@ namespace Runtime.Dialogue.Interaction
         /// </summary>
         private void ResolveAndRegisterDialogueView()
         {
-            IDialogueView view = null;
-
-            if (_dialogueViewProvider != null)
-            {
-                view = _dialogueViewProvider as IDialogueView;
-                if (view == null)
-                {
-                    Debug.LogWarning($"[_dialogueViewProvider] に IDialogueView が実装されていません: {_dialogueViewProvider.name}");
-                }
-            }
-            else
-            {
-                // 非アクティブ含めて検索
-                view = FindObjectOfType<MonoBehaviour>(true) as IDialogueView;
-            }
+            // 非アクティブ含めて検索 (手動アサインフィールドは廃止)
+            var view = FindObjectOfType<MonoBehaviour>(true) as IDialogueView;
 
             if (view != null && DialogueManager.Instance != null)
             {
@@ -159,7 +142,7 @@ namespace Runtime.Dialogue.Interaction
         }
 
         /// <summary>
-        /// 外部から View を強制設定する場合用
+        /// 外部から View を強制設定する場合用 (動的な切り替え等)
         /// </summary>
         public void SetDialogueView(IDialogueView view) 
         {
