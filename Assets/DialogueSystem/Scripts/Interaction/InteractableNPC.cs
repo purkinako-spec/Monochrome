@@ -1,5 +1,6 @@
 using UnityEngine;
 using Runtime.Dialogue.Logic;
+using Runtime.Dialogue.Data; // DialogueContainer のネームスペースを追加 (プロジェクト構成に合わせて調整してください)
 
 namespace Runtime.Dialogue.Interaction
 {
