@@ -5,17 +5,18 @@ namespace Runtime.Dialogue.Interaction
 {
     /// <summary>
     /// Script 2: インタラクト対象オブジェクトにアタッチ
-    /// Player(Script 1) から通知を受け、インスペクタで指定した Processor(Script 3) に委譲する
+    /// Player(Script 1: PlayerInteractor) から通知を受け、インスペクタで指定した Processor(Script 3) に委譲する
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class InteractableReceiver : MonoBehaviour
     {
         [Header("Processor (Script 3 Implementation)")]
         [Tooltip("このオブジェクトで実行したい具体的な処理(IInteractableProcessor実装)をインスペクタで選択・アサイン")]
-        [SerializeReference] // 具象クラスをインスペクタでポリモーフィックに指定可能にする
+        // [SerializeReference] は UnityEngine.Object 継承クラス (MonoBehaviour等) には使えないため [SerializeField] を使用
+        [SerializeField] 
         private IInteractableProcessor _processor;
 
-        // --- Public API (Script 1 から呼ばれる) ---
+        // --- Public API (Script 1: PlayerInteractor から呼ばれる) ---
 
         public IInteractableProcessor Processor 
         { 
@@ -47,6 +48,7 @@ namespace Runtime.Dialogue.Interaction
         private void Reset()
         {
             // 同一GameObject上のProcessorを自動探索してセット (利便性向上)
+            // NPCInteractable が DialogueProcessor (MonoBehaviour) を付与しているため、それが拾われる
             if (_processor == null)
             {
                 var found = GetComponent<IInteractableProcessor>();
