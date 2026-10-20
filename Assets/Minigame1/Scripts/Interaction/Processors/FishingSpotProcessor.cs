@@ -17,7 +17,6 @@ namespace MiniGame.Fish.Test2
         [SerializeField] private string _minigameSceneName = "FishingMinigameSceneTest1";
 
         // Player制御用インターフェース (プロジェクト側で定義推奨)
-        // ここでは汎用的に MonoBehaviour の enabled を切るか、IPlayerControllable 等を想定
         private interface IPlayerControllable
         {
             bool Enabled { get; set; }
@@ -32,54 +31,63 @@ namespace MiniGame.Fish.Test2
         {
             Debug.Log($"[{name}] 釣りミニゲーム開始要求: {_minigameSceneName}");
 
-            // 1. プレイヤー制御無効化 (GetComponent<PlayerMove>() 等の具象クラス依存を排除)
-            // 対象が IPlayerControllable (または PlayerInput, MonoBehaviour) を実装している想定
+            // 1. プレイヤー制御無効化
+            DisablePlayerControl(interactor);
+
+            // 2. シーン遷移処理
+            LoadMinigameScene();
+        }
+
+        private void DisablePlayerControl(GameObject interactor)
+        {
+            // 独自インターフェース優先
             var playerController = interactor.GetComponent<IPlayerControllable>();
             if (playerController != null)
             {
                 playerController.Enabled = false;
-            }
-            else
-            {
-                // フォールバック: PlayerInput コンポーネントがあれば無効化 (Input System 使用時)
-                var playerInput = interactor.GetComponent<UnityEngine.InputSystem.PlayerInput>();
-                if (playerInput != null) playerInput.enabled = false;
-                
-                // さらにフォールバック: 同一オブジェクトの MonoBehaviour を全無効化したくない場合は、
-                // 専用の "PlayerController" スクリプトを取得して enabled=false にする実装に置き換えてください。
-                Debug.LogWarning($"[{name}] IPlayerControllable または PlayerInput が見つかりません。手動で Player 制御を無効化してください。", interactor);
+                return;
             }
 
-            // 2. シーン遷移
-            // SceneLoader がシングルトン/静的アクセス可能ならそれを使う (FindObjectOfType 非推奨)
-            var sceneLoader = SceneLoader.Instance; // シングルトンプロパティ推奨
-            if (sceneLoader == null)
+            // Input System の PlayerInput コンポーネントがあれば無効化
+            var playerInput = interactor.GetComponent<UnityEngine.InputSystem.PlayerInput>();
+            if (playerInput != null)
             {
-                // シングルトンでない場合はシーン内検索 (キャッシュ推奨)
-                sceneLoader = Object.FindFirstObjectByType<SceneLoader>(); // Unity 2020+ / FindObjectOfType は非推奨
+                playerInput.enabled = false;
+                return;
             }
 
-            if (sceneLoader != null)
+            // 汎用的な MonoBehaviour 無効化は避け、警告のみ出す (プロジェクト固有の PlayerController 等を取得して無効化する実装に置き換えてください)
+            Debug.LogWarning($"[{name}] IPlayerControllable または PlayerInput が見つかりません。Player 制御の無効化を手動で実装してください。", interactor);
+        }
+
+        private void LoadMinigameScene()
+        {
+            // プロジェクト固有の SceneLoader が存在するか確認 (リフレクションや共通インターフェース経由が望ましいが、ここでは型名で検索)
+            // ※ 実際のプロジェクトでは "SceneLoader" クラスを共通アセンブリに定義し、参照するのが正解です。
+            var sceneLoaderType = System.Type.GetType("SceneLoader") 
+                                ?? System.Type.GetType("MiniGame.Fish.Test2.SceneLoader")
+                                ?? System.Type.GetType("Runtime.SceneLoader");
+
+            if (sceneLoaderType != null)
             {
-                // シーン名を引数で渡せるように SceneLoader 側を修正しておくこと
-                sceneLoader.LoadScene(_minigameSceneName);
-            }
-            else
-            {
-                // フォールバック: アドティブ読み込み
-                Debug.LogWarning($"[{name}] SceneLoader が見つかりません。フォールバックで Additive 読み込みします。");
-                SceneManager.LoadScene(_minigameSceneName, LoadSceneMode.Additive);
+                // 静的 Instance プロパティまたはメソッドをリフレクションで呼び出し試行
+                var instanceProp = sceneLoaderType.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                var loadMethod = sceneLoaderType.GetMethod("LoadScene", new[] { typeof(string) });
+
+                if (instanceProp != null && loadMethod != null)
+                {
+                    var instance = instanceProp.GetValue(null);
+                    if (instance != null)
+                    {
+                        loadMethod.Invoke(instance, new object[] { _minigameSceneName });
+                        return;
+                    }
+                }
             }
 
-            // 3. ミニゲーム側の初期化通知 (必要なら)
-            // FishingMinigameManager.Instance?.StartMinigame(interactor, this);
+            // フォールバック: アドティブ読み込み (標準機能)
+            Debug.LogWarning($"[{name}] SceneLoader が見つからないか Instance/LoadScene が不正です。標準の Additive 読み込みでフォールバックします。");
+            SceneManager.LoadScene(_minigameSceneName, LoadSceneMode.Additive);
         }
     }
-
-    // 補足: SceneLoader の想定インターフェース (プロジェクト側で実装要)
-    // public class SceneLoader : MonoBehaviour 
-    // {
-    //     public static SceneLoader Instance { get; private set; }
-    //     public void LoadScene(string sceneName) { ... }
-    // }
 }

@@ -8,11 +8,12 @@ namespace MiniGame.Fish.Test2.Interaction
     /// <summary>
     /// NPC会話用のセットアップヘルパーコンポーネント
     /// InteractableReceiver と DialogueProcessor を自動で構成し、インスペクタで会話データを設定できるようにする
+    /// 自身も IInteractableProcessor を実装し、処理を内部の DialogueProcessor に委譲する
     /// </summary>
     [RequireComponent(typeof(InteractableReceiver))]
     [RequireComponent(typeof(DialogueProcessor))]
     [AddComponentMenu("Interaction/NPC Interactable")]
-    public class NPCInteractable : MonoBehaviour
+    public class NPCInteractable : MonoBehaviour, IInteractableProcessor
     {
         [Header("Dialogue Settings")]
         [Tooltip("会話データコンテナ")]
@@ -69,8 +70,6 @@ namespace MiniGame.Fish.Test2.Interaction
             // Receiver の Processor フィールドが未設定なら自動でセット (SerializeReference対応)
             if (_receiver != null && _receiver.Processor == null)
             {
-                // SerializeReference フィールドへの代入は Unity の内部処理で行われるため、
-                // ここでは単純に代入するだけでインスペクタ上でも反映される
                 _receiver.Processor = _processor;
             }
         }
@@ -83,5 +82,21 @@ namespace MiniGame.Fish.Test2.Interaction
             _dialogueContainer = container;
             SyncSettingsToProcessor();
         }
+
+        // ============================================================
+        // IInteractableProcessor 実装 (内部 Processor に委譲)
+        // ============================================================
+
+        public bool CanInteract(GameObject interactor) 
+            => _processor != null && _processor.CanInteract(interactor);
+
+        public void Interact(GameObject interactor) 
+            => _processor?.Interact(interactor);
+
+        public string GetInteractionText() 
+            => _processor?.GetInteractionText() ?? _interactionText;
+
+        public int Priority 
+            => _processor?.Priority ?? _priority;
     }
 }
