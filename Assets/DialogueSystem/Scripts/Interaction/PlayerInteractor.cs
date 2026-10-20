@@ -33,6 +33,7 @@ namespace Runtime.Dialogue.Interaction
         private InteractableReceiver _currentBestTarget;
         private Collider2D[] _overlapBuffer = new Collider2D[20];
         private bool _inputEnabled = false;
+        private InputAction _cachedAction; // 参照をキャッシュして GC/Null チェックを安定化
 
         // イベント (UI Presenter が購読)
         public event System.Action<InteractableReceiver> OnTargetChanged;
@@ -50,60 +51,87 @@ namespace Runtime.Dialogue.Interaction
 
         private void ValidateInputAction()
         {
-            if (_interactAction == null || _interactAction.action == null)
+            // 参照解決
+            if (_interactAction == null)
             {
-                Debug.LogError("[PlayerInteractor] _interactAction が未設定です。InputActionAsset の 'Player/Interact' 等を割り当ててください。", this);
+                Debug.LogError("[PlayerInteractor] _interactAction が未設定です (InspectorでInputActionReferenceをアサイン)。", this);
                 return;
             }
+
+            _cachedAction = _interactAction.action;
+            if (_cachedAction == null)
+            {
+                Debug.LogError("[PlayerInteractor] InputActionReference が Action を解決できません (Action Asset が未設定、または Action 名が間違っている)。", this);
+                return;
+            }
+
             try
             {
-                // 既に有効な場合は一度無効化してクリーンアップ (多重登録防止)
-                if (_inputEnabled)
+                // 多重登録防止: 既に有効なら一度クリーンアップ
+                CleanupInputActionInternal();
+
+                // ★ 重要: Action Map / Asset 全体を有効化しないと Native 側でコールバックが来ない、またはクラッシュするケースがある
+                if (_cachedAction.actionMap != null && !_cachedAction.actionMap.enabled)
                 {
-                    _interactAction.action.performed -= OnInteractInput;
-                    _interactAction.action.Disable();
-                    _inputEnabled = false;
+                    _cachedAction.actionMap.Enable();
+                }
+                else if (_cachedAction.asset != null && !_cachedAction.asset.enabled)
+                {
+                    _cachedAction.asset.Enable();
                 }
 
-                _interactAction.action.Enable();
-                _interactAction.action.performed += OnInteractInput;
+                // 個別 Action の有効化 (Map/Asset が有効なら不要だが念のため)
+                if (!_cachedAction.enabled)
+                {
+                    _cachedAction.Enable();
+                }
+
+                _cachedAction.performed += OnInteractInput;
                 _inputEnabled = true;
-                Debug.Log($"[PlayerInteractor] 入力アクション有効化完了: {_interactAction.action.actionMap?.name}/{_interactAction.action.name}");
+
+                if (_verboseLogging)
+                {
+                    Debug.Log($"[PlayerInteractor] 入力アクション有効化完了: Map='{_cachedAction.actionMap?.name}', Action='{_cachedAction.name}', Enabled={_cachedAction.enabled}");
+                }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[PlayerInteractor] 入力アクション有効化失敗: {e.Message}", this);
+                Debug.LogError($"[PlayerInteractor] 入力アクション有効化中に例外: {e.GetType().Name} - {e.Message}", this);
+                CleanupInputActionInternal(); // 失敗したらロールバック
             }
         }
 
         private void OnDestroy()
         {
-            CleanupInputAction();
+            CleanupInputActionInternal();
         }
 
         private void OnDisable()
         {
             // シーン遷移や無効化時にも確実にクリーンアップ
-            CleanupInputAction();
+            CleanupInputActionInternal();
         }
 
-        private void CleanupInputAction()
+        private void CleanupInputActionInternal()
         {
-            if (_inputEnabled && _interactAction?.action != null)
+            if (!_inputEnabled || _cachedAction == null) return;
+
+            try
             {
-                try
-                {
-                    _interactAction.action.performed -= OnInteractInput;
-                    _interactAction.action.Disable();
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogWarning($"[PlayerInteractor] 入力アクションクリーンアップ中にエラー: {e.Message}");
-                }
-                finally
-                {
-                    _inputEnabled = false;
-                }
+                _cachedAction.performed -= OnInteractInput;
+                
+                // Action 自体を無効化 (他のコンポーネントが使っていない前提なら)
+                // 共有アセットの場合は Disable しない方が安全な場合もあるため、ここでは Unsubscribe のみに留めるのが無難
+                // _cachedAction.Disable(); 
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[PlayerInteractor] 入力アクションクリーンアップ中に例外 (無視): {e.Message}");
+            }
+            finally
+            {
+                _inputEnabled = false;
+                _cachedAction = null;
             }
         }
 
@@ -169,13 +197,24 @@ namespace Runtime.Dialogue.Interaction
 
             foreach (var receiver in _detectedReceivers)
             {
-                if (receiver == null) 
+                // Unity の擬似 null チェック (Destroy 直後対応)
+                if (!receiver) 
                 {
-                    if (_verboseLogging) Debug.Log($"[PlayerInteractor] 評価スキップ: ReceiverがNull");
+                    if (_verboseLogging) Debug.Log($"[PlayerInteractor] 評価スキップ: Receiverが破棄済み/Null");
                     continue; 
                 }
 
-                bool canInteract = receiver.CanInteract(gameObject);
+                bool canInteract = false;
+                try 
+                {
+                    canInteract = receiver.CanInteract(gameObject);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[PlayerInteractor] CanInteract 呼び出し中に例外: {receiver.name}", e);
+                    continue;
+                }
+
                 float dist = Vector2.Distance(centerPos, receiver.transform.position);
                 float score = receiver.Priority * 1000f - dist;
 
@@ -183,7 +222,6 @@ namespace Runtime.Dialogue.Interaction
                 {
                     string processorName = receiver.Processor?.GetType().Name ?? "NULL";
                     string containerName = "N/A";
-                    // Receiver.Processor が直接 DialogueProcessor になっている想定
                     if (receiver.Processor is Runtime.Dialogue.Interaction.Processors.DialogueProcessor dp)
                     {
                         containerName = dp.DialogueContainer ? dp.DialogueContainer.name : "NULL";
@@ -220,38 +258,40 @@ namespace Runtime.Dialogue.Interaction
         /// </summary>
         private void OnInteractInput(InputAction.CallbackContext ctx)
         {
-            // ネイティブクラッシュ防止: コールバック内の例外を全てキャッチ
+            // ★ Native クラッシュ完全防御: このコールバック内で一切の例外を出さない
             try
             {
-                if (_currentBestTarget != null)
+                // Unity 擬似 null チェック
+                if (!_currentBestTarget)
                 {
-                    // 防御的チェック: Processor が欠落していないか確認 (CanInteract通過済みだが念のため)
-                    if (_currentBestTarget.Processor == null)
+                    if (_verboseLogging)
                     {
-                        Debug.LogError($"[PlayerInteractor] インタラクト実行失敗: {_currentBestTarget.name} の Processor が Null です。", _currentBestTarget);
-                        return;
+                        Debug.LogWarning("[PlayerInteractor] インタラクト対象なし (検出0件 または 全てCanInteract=false)。");
                     }
+                    return;
+                }
 
-                    if (_verboseLogging)
-                    {
-                        Debug.Log($"[PlayerInteractor] インタラクト実行: {_currentBestTarget.name} ({_currentBestTarget.Processor.GetType().Name})");
-                    }
-                    
-                    _currentBestTarget.Interact(gameObject); // Script 2 経由で Script 3 へ
-                    OnInteractPerformed?.Invoke();
-                }
-                else
+                // Processor 存在チェック
+                var processor = _currentBestTarget.Processor;
+                if (processor == null)
                 {
-                    // ここに来る場合、検出0件 または 全てCanInteract=false
-                    if (_verboseLogging)
-                    {
-                        Debug.LogWarning("[PlayerInteractor] インタラクト対象なし (検出0件 または 全てCanInteract=false)。上部の詳細ログを確認してください。");
-                    }
+                    Debug.LogError($"[PlayerInteractor] インタラクト実行失敗: {_currentBestTarget.name} の Processor が Null です。", _currentBestTarget);
+                    return;
                 }
+
+                if (_verboseLogging)
+                {
+                    Debug.Log($"[PlayerInteractor] インタラクト実行: {_currentBestTarget.name} ({processor.GetType().Name})");
+                }
+                
+                // 実際の処理実行
+                _currentBestTarget.Interact(gameObject);
+                OnInteractPerformed?.Invoke();
             }
             catch (System.Exception e)
             {
-                // ここで例外を握りつぶさずログ出力し、ネイティブ層に伝播させない
+                // 例外をログに出すだけで飲み込む (Native 層に伝播させない)
+                // LogException を使うとスタックトレース付きで出る
                 Debug.LogException(new System.Exception($"[PlayerInteractor] インタラクト処理中に例外発生 (ネイティブクラッシュ防止のため捕捉)", e), this);
             }
         }
@@ -263,7 +303,7 @@ namespace Runtime.Dialogue.Interaction
             Vector3 center = _detectionCenter ? _detectionCenter.position : transform.position;
             Gizmos.DrawWireSphere(center, _detectionRadius);
             
-            if (_currentBestTarget != null)
+            if (_currentBestTarget)
             {
                 Gizmos.color = Color.green;
                 Gizmos.DrawLine(center, _currentBestTarget.transform.position);
