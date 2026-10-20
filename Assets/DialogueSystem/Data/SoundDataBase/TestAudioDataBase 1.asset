@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8795e2c357caf3e43af6a24228942301, type: 3}
+  m_Name: TestAudioDataBase 1
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Audio.DialogueAudioDatabase
+  audioDataList:
+  - key: bg
+    type: 0
+    clip: {fileID: 8300000, guid: a85a56cbe69710e4d832435f7adf86bd, type: 3}
+  - key: test
+    type: 1
+    clip: {fileID: 8300000, guid: 01a52653b49a49242a1b5fc12906a877, type: 3}
+  - key: quiz1
+    type: 1
+    clip: {fileID: 8300000, guid: 13458979bde7ffe49a793b900eb3a561, type: 3}
+  - key: quiz2
+    type: 1
+    clip: {fileID: 8300000, guid: 69895e049dbc5734698fce5cdbc685f9, type: 3}
+  - key: quiz3
+    type: 1
+    clip: {fileID: 8300000, guid: 621fb0f464b952243b792adad0db55c7, type: 3}
+  - key: quiz4
+    type: 1
+    clip: {fileID: 8300000, guid: 225fb2863fddfaa42bef9acf9ab1e3ec, type: 3}
+  - key: limTimer
+    type: 1
+    clip: {fileID: 8300000, guid: 43de0be02d59eed4bb81d632bd7d982a, type: 3}
+  - key: taiko
+    type: 1
+    clip: {fileID: 8300000, guid: 9813330c0e892e24892540f5ced8959f, type: 3}
+  - key: kettei
+    type: 1
+    clip: {fileID: 8300000, guid: 67934f65b214fbf41b59778906794417, type: 3}
+  - key: choice_select
+    type: 1
+    clip: {fileID: 8300000, guid: fcfd3fd0079ee5b42b49365783124666, type: 3}
+  - key: next_page
+    type: 1
+    clip: {fileID: 8300000, guid: 822c764ce99b20f44993b95f19fb4165, type: 3}

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8795e2c357caf3e43af6a24228942301, type: 3}
+  m_Name: TestAudioDataBase 2
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Audio.DialogueAudioDatabase
+  audioDataList:
+  - key: t1
+    type: 3
+    clip: {fileID: 8300000, guid: 615c70c2ecd6eaa41b040c759c3b2cc1, type: 3}
+  - key: t2
+    type: 3
+    clip: {fileID: 8300000, guid: fcfd3fd0079ee5b42b49365783124666, type: 3}
+  - key: t3
+    type: 3
+    clip: {fileID: 8300000, guid: bfd721e0f41a4f646bd340d54495623b, type: 3}
+  - key: t4
+    type: 3
+    clip: {fileID: 8300000, guid: a93d8c4b763045b40823a91ca7342781, type: 3}
+  - key: t6
+    type: 3
+    clip: {fileID: 8300000, guid: 58a4598fd1a61dd4e8b7984cdf02121c, type: 3}
+  - key: t7
+    type: 3
+    clip: {fileID: 8300000, guid: 8d9c096453a4d484eae69976f09c6ac4, type: 3}
+  - key: t8
+    type: 3
+    clip: {fileID: 8300000, guid: 4cafbdf29f5c81341a749682f18b70dc, type: 3}

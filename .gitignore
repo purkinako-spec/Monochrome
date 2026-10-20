@@ -79,3 +79,4 @@ sysinfo.txt
 *.mdb.meta
 *.opendb
 *.VC.db
+.aider*

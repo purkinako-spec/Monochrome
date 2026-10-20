@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc6dcf3673927a488b8d4f7d6fd5ffb, type: 3}
+  m_Name: test1
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.DialogueContainer
+  startNodeID: 20707b34-5c10-4a32-92e3-680bd857898e
+  allNodes:
+  - graphPosition: {x: 124.8, y: 56}
+    nextNodeID: 3f52be3f-e12c-4260-a30d-0354b76ae485
+    nodeID: 2f0407a8-2446-4a49-8cfb-3c002676495f
+    speakerName: b
+    dialogueText: 'bbbbbbdddddddddddddddddddddddddd
+
+      dddddddddddddddddd'
+    choices: []
+  - graphPosition: {x: 558.4, y: 56}
+    nextNodeID: 
+    nodeID: 3f52be3f-e12c-4260-a30d-0354b76ae485
+    speakerName: a
+    dialogueText: bb
+    choices: []
+  - graphPosition: {x: 120.8, y: 296.8}
+    nextNodeID: 
+    nodeID: 0ccb635d-3a4f-4779-9882-67c82a6595b6
+    speakerName: b
+    dialogueText: 'aaasdfsadfsdafasdf[gold:500]'
+    choices:
+    - choiceText: a
+      targetNodeID: Node_89401
+      branchType: 1
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: b
+      targetNodeID: Node_3ca0e
+      branchType: 1
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+  - graphPosition: {x: -342.4, y: 56}
+    nextNodeID: 
+    nodeID: 20707b34-5c10-4a32-92e3-680bd857898e
+    speakerName: a
+    dialogueText: aaaaa
+    choices:
+    - choiceText: a
+      targetNodeID: 2f0407a8-2446-4a49-8cfb-3c002676495f
+      branchType: DefaultChoice
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: b
+      targetNodeID: 0ccb635d-3a4f-4779-9882-67c82a6595b6
+      branchType: 2
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+  - graphPosition: {x: 606.4, y: 296.8}
+    nextNodeID: 
+    nodeID: Node_89401
+    speakerName: upper
+    dialogueText: "\u3053\u3053\u306B\u30BB\u30EA\u30D5\u3092\u5165\u529B"
+    choices: []
+  - graphPosition: {x: 606.4, y: 452}
+    nextNodeID: 
+    nodeID: Node_3ca0e
+    speakerName: lower
+    dialogueText: "\u3053\u3053\u306B\u30BB\u30EA\u30D5\u3092\u5165\u529B"
+    choices: []

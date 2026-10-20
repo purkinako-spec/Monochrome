@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using Runtime.Dialogue.Interaction;
 
@@ -33,7 +33,7 @@ namespace MiniGame.Fish.Test2
             var sceneLoader = Object.FindObjectOfType<SceneLoader>(); // シングルトン化推奨
             if (sceneLoader != null)
             {
-                sceneLoader.LoadScene(_minigameSceneName);
+                sceneLoader.LoadScene();
             }
             else
             {

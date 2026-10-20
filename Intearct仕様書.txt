@@ -1,0 +1,200 @@
+## 1. 目的・背景
+================================================================================
+既存の `Interact.cs` が「検出・入力・実行・UI通知」を全て担っており、
+単一責任原則(SRP)に反し、拡張性・テスト性が低下しているため、
+以下の3層に分離・再設計する。
+
+- Layer 1 (Player側): 検出・入力監視・ターゲット選定・実行命令
+- Layer 2 (Object側): 窓口・振り分け・可否判定窓口
+- Layer 3 (Processor): 実際のビジネスロジック(会話、釣り、扉等) ※差し替え可能
+
+================================================================================
+## 2. アーキテクチャ概要
+================================================================================
++------------------+      Input/Event      +------------------+      Delegate      +------------------+
+|  PlayerInteractor| --------------------> |InteractableReceiver| ------------------> |IInteractableProcessor|
+|    (Script 1)    |  Detect / Interact()  |    (Script 2)    |   Interact()       |    (Script 3)    |
++------------------+                       +------------------+                    +------------------+
+        |                                                                   /       |       \
+        | Event (OnTargetChanged)                                        /        |        \
+        v                                                              v         v         v
++------------------+                                           +------+  +------+  +------+
+|InteractionUIPresenter|                                         |Dialogue| |Fishing| |Door  |
+|      (UI)        |                                           |Processor| |Processor| |Processor|
++------------------+                                           +---------+ +---------+ +---------+
+
+================================================================================
+## 3. インターフェース定義 (Script 3 契約)
+================================================================================
+File: Assets/DialogueSystem/Scripts/Interaction/IInteractableProcessor.cs
+
+namespace Runtime.Dialogue.Interaction
+{
+    public interface IInteractableProcessor
+    {
+        // 実行可否判定 (距離以外: クエスト状態、アイテム所持、フラグ等)
+        bool CanInteract(GameObject interactor);
+
+        // インタラクト実行本体
+        void Interact(GameObject interactor);
+
+        // UI表示用テキスト (例: "話しかける", "釣りをする", "開ける")
+        string GetInteractionText();
+
+        // 優先度 (複数候補時のソート用。高いほど優先)
+        int Priority { get; }
+    }
+}
+
+================================================================================
+## 4. クラス詳細仕様
+================================================================================
+
+### 4.1 Script 1: PlayerInteractor (Player にアタッチ)
+File: Assets/DialogueSystem/Scripts/Interaction/PlayerInteractor.cs
+
+【インスペクタ設定】
+- _detectionRadius (float): 検出半径 (Default: 1.5)
+- _interactableLayer (LayerMask): 検出対象レイヤー (Interactable推奨)
+- _detectionCenter (Transform): 検出基準点 (Nullなら自Transform)
+- _interactAction (InputActionReference): 入力アクション (Player/Interact)
+- _showGizmos (bool): ギズモ表示
+
+【主要機能】
+- Update(): DetectReceivers() -> UpdateBestTarget()
+- DetectReceivers(): Physics2D.OverlapCircleNonAlloc で InteractableReceiver 収集
+- UpdateBestTarget(): スコアリング (Priority * 1000 - Distance) で最適ターゲット決定
+- OnInteractInput(): 入力検知 -> CurrentTarget.Interact(gameObject)
+- Events: OnTargetChanged(Receiver), OnInteractPerformed()
+
+【ターゲット選定ロジック】
+score = receiver.Priority * 1000f - Vector2.Distance(center, receiver.transform.position);
+※ Priority 1差 = 1000ユニット距離差 として優先度を強く反映
+
+### 4.2 Script 2: InteractableReceiver (インタラクト対象オブジェクトにアタッチ)
+File: Assets/DialogueSystem/Scripts/Interaction/InteractableReceiver.cs
+
+【インスペクタ設定 (核心)】
+- _processor (IInteractableProcessor) [SerializeReference]
+  → インスペクタの「+」ドロップダウンで具象クラスを選択・インライン編集可能
+
+【公開API (Script 1 から呼ばれる)】
+- Processor (Property): 設定Processorインスタンス
+- InteractionText (Property): Processor.GetInteractionText() ショートカット
+- Priority (Property): Processor.Priority ショートカット
+- CanInteract(GameObject): Processor.CanInteract() ショートカット (Nullチェック込み)
+- Interact(GameObject): エントリーポイント。Processor.Interact() 呼び出し
+
+【補助】
+- Reset(): 同一GameObject上の IInteractableProcessor 実装を自動探索・セット
+
+### 4.3 Script 3 実装例 (標準ライブラリ)
+
+#### A. DialogueProcessor (会話)
+File: Assets/DialogueSystem/Scripts/Interaction/Processors/DialogueProcessor.cs
+- 依存: DialogueManager, DialogueContainer
+- パラメータ: _dialogueContainer, _interactionText, _priority, _destroyAfterDialogue
+- 挙動: DialogueManager.Instance.StartDialogue() 呼び出し。View未登録時1秒待機リトライ。
+
+#### B. FishingSpotProcessor (釣りミニゲーム)
+File: Assets/Minigame1/Scripts/Interaction/Processors/FishingSpotProcessor.cs
+- 依存: SceneLoader / SceneManager
+- パラメータ: _interactionText, _priority, _minigameSceneName
+- 挙動: アドティブシーン読み込み or マネージャー起動。プレイヤー移動無効化等。
+
+#### C. 拡張例
+- DoorProcessor, ItemPickupProcessor, NPCQuestProcessor 等
+- 同一インターフェースで実装し、インスペクタで切り替え可能。
+
+### 4.4 UI Presenter (別コンポーネント)
+File: Assets/DialogueSystem/Scripts/Interaction/UI/InteractionUIPresenter.cs
+
+【役割】 PlayerInteractor.OnTargetChanged 購読し、プロンプト表示/非表示・テキスト更新
+【設定】 _interactor, _promptRoot(GameObject), _promptText(TMP_Text), _keyDisplayName(string)
+
+================================================================================
+## 5. セットアップ手順 (Scene Setup)
+================================================================================
+
+### Player Prefab
+1. PlayerInteractor アタッチ
+2. _interactAction ← InputSystem_Actions の Player/Interact
+3. _interactableLayer ← Interactable レイヤーのみ
+4. InteractionUIPresenter アタッチ (UIプレハブ参照設定)
+5. 旧 Interact.cs, InteractionController.cs 削除/無効化
+
+### インタラクト対象 (NPC, 釣りスポット, 扉, アイテム)
+1. Layer → Interactable
+2. Collider2D (IsTrigger推奨) 追加
+3. InteractableReceiver アタッチ
+4. Processor 選択・設定:
+   - _processor 欄の「+」ドロップダウンクリック
+   - クラス選択 (DialogueProcessor, FishingSpotProcessor 等)
+   - インライン展開されるパラメータ設定
+
+================================================================================
+## 6. データフローシーケンス
+================================================================================
+1. User入力 -> InputSystem -> PlayerInteractor (Callback)
+2. PlayerInteractor: Physics検出 -> スコアリング -> BestTarget決定
+3. PlayerInteractor -> UI: OnTargetChanged Event -> プロンプト表示
+4. User入力(Interact) -> PlayerInteractor -> InteractableReceiver.Interact()
+5. InteractableReceiver: CanInteractチェック -> Processor.Interact() 実行
+6. Processor: 固有処理 (会話開始, シーン遷移, アイテム取得等)
+
+================================================================================
+## 7. 移行チェックリスト
+================================================================================
+[ ] Phase 0: インターフェース・基底クラス作成 (コンパイル通過)
+[ ] Phase 1: 既存会話機能移植 (DialogueProcessor作成、NPC動作確認)
+[ ] Phase 2: 釣りミニゲーム統合 (FishingSpotProcessor作成、動作確認)
+[ ] Phase 3: 旧システム削除 (Interact.cs旧, InteractableNPC.cs旧, InteractionController.cs)
+[ ] Phase 4: UI/UX調整 (アニメーション、キー表示動的取得、複数候補ヒント)
+[ ] Phase 5: テスト・リファクタ (単体/結合テスト、パフォーマンス)
+
+================================================================================
+## 8. 設計判断理由 (ADR)
+================================================================================
+ADR-01: SerializeReference採用
+  理由: インスペクタで具象クラス選択・インライン編集・使い分けをコード修正なしで実現。
+        MonoBehaviour参照(SerializeField)だと同一オブジェクト限定になるが、
+        これにより「オブジェクト専用の処理」をデータとして持てる。
+
+ADR-02: Processorを Interface + MonoBehaviour実装に
+  理由: MonoBehaviourなら Start/Coroutine 利用可能。ScriptableObject化も将来可能。
+        純粋C#クラスだとUnityイベント・Coroutine利用に制約。
+
+ADR-03: 検出ロジックは当面 PlayerInteractor 内部に保持
+  理由: 現状 OverlapCircleのみ。将来 IInteractionDetector 切り出しは拡張時対応 (YAGNI)。
+
+ADR-04: スコアリング Priority * 1000 - Distance
+  理由: 「重要ギミックは遠くても優先」というゲームデザイン要件対応。係数1000で直感的。
+
+ADR-05: UIを別コンポーネントに分離
+  理由: PlayerInteractorがUI詳細(TMP, Animator, Canvas)を知る必要をなくす。
+        UI変更・ローカライズ・コントローラー対応時にロジックに影響させない。
+
+================================================================================
+## 9. 今後の拡張ポイント
+================================================================================
+1. IInteractionDetector 導入 (Raycast, BoxCast, 3D対応)
+2. マルチターゲット対応 (ラジアルメニュー等)
+3. インタラクト条件のデータ駆動化 (ScriptableObject: HasItem, QuestState等)
+4. 非同期/UniTask対応 (アニメ待ち、フェード待ちを自然に記述)
+5. InputSystem動的キーバインド表示 (E/□/A 等を自動取得)
+
+================================================================================
+## 10. ファイル構成まとめ
+================================================================================
+Assets/
+├── DialogueSystem/
+│   └── Scripts/
+│       └── Interaction/
+│           ├── IInteractableProcessor.cs          // Interface
+│           ├── PlayerInteractor.cs                // Script 1
+│           ├── InteractableReceiver.cs            // Script 2
+│           ├── InteractionUIPresenter.cs          // UI
+│           └── Processors/
+│               ├── DialogueProcessor.cs
+│               └── (DoorProcessor, etc.)
+

@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc6dcf3673927a488b8d4f7d6fd5ffb, type: 3}
+  m_Name: murabito
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueContainer
+  startNodeID: Node_0c029
+  allNodes:
+  - graphPosition: {x: 109.6, y: 103.2}
+    nextNodeID: 
+    nodeID: Node_0c029
+    speakerName: 
+    dialogueText: "100G\u6255\u3046"
+    choices:
+    - choiceText: "\u6255\u3046"
+      targetNodeID: Node_ed119
+      branchType: 0
+      conditionKey: 
+      conditionValue: 0
+    - choiceText: "\u6255\u308F\u306A\u3044"
+      targetNodeID: Node_9b43e
+      branchType: 0
+      conditionKey: 
+      conditionValue: 0
+  - graphPosition: {x: 525.6, y: 103.2}
+    nextNodeID: 
+    nodeID: Node_ed119
+    speakerName: 
+    dialogueText: 
+    choices:
+    - choiceText: "\u6255\u3048\u305F"
+      targetNodeID: Node_7adb6
+      branchType: 1
+      conditionKey: Gold
+      conditionValue: 100
+    - choiceText: "\u307E\u305F\u6765\u308B"
+      targetNodeID: Node_e3b94
+      branchType: 0
+      conditionKey: 
+      conditionValue: 0
+  - graphPosition: {x: 934.4, y: 103.2}
+    nextNodeID: 
+    nodeID: Node_7adb6
+    speakerName: 
+    dialogueText: "\u6255\u3048\u305F"
+    choices: []
+  - graphPosition: {x: 525.6, y: 381.6}
+    nextNodeID: 
+    nodeID: Node_9b43e
+    speakerName: 
+    dialogueText: "\u6255\u308F\u306A\u304B\u3063\u305F"
+    choices: []
+  - graphPosition: {x: 934.4, y: 258.4}
+    nextNodeID: 
+    nodeID: Node_e3b94
+    speakerName: 
+    dialogueText: "\u3055\u3088\u306A\u3089"
+    choices: []

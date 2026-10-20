@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Runtime.Dialogue.Interaction;
 
 namespace Runtime.Dialogue.Interaction

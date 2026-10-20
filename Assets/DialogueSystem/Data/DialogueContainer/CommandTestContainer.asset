@@ -1,0 +1,208 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc6dcf3673927a488b8d4f7d6fd5ffb, type: 3}
+  m_Name: CommandTestContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueContainer
+  startNodeID: Node_60c34
+  allNodes:
+  - graphPosition: {x: 932.8, y: 100}
+    nextNodeID: 
+    nodeID: Node_6c183
+    speakerName: dd
+    dialogueText: '[speed:value=121]ssssssssssssssssssssssssssssssss'
+    choices:
+    - choiceText: New Choice
+      targetNodeID: Node_92822
+      branchType: PrefabUIBranchHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: New Choice
+      targetNodeID: Node_9d335
+      branchType: PrefabUIBranchHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+  - graphPosition: {x: 626.4, y: 100}
+    nextNodeID: Node_6c183
+    nodeID: Node_e15cc
+    speakerName: "\u3058\u3085\u3093\u3059\u3044\u306A\u304D\u306E\u3053\u306E\u304D\u306A\u3053\u3055\u3093"
+    dialogueText: "\u3053\u3053\u306B\u30BB\u30EA\u30D5\u3092\u5165\u529B"
+    choices: []
+  - graphPosition: {x: 1449.6, y: 100}
+    nextNodeID: Node_0e8bc
+    nodeID: Node_92822
+    speakerName: ad
+    dialogueText: a
+    choices: []
+  - graphPosition: {x: 1449.6, y: 255.20001}
+    nextNodeID: Node_0e8bc
+    nodeID: Node_9d335
+    speakerName: fa
+    dialogueText: b
+    choices: []
+  - graphPosition: {x: 1760, y: 100}
+    nextNodeID: 
+    nodeID: Node_0e8bc
+    speakerName: gare
+    dialogueText: "\u3053\u3053\u306B\u30BB\u30EA\u30D5\u3092\u5165\u529B"
+    choices:
+    - choiceText: New Choice
+      targetNodeID: Node_27bac
+      branchType: PrefabUIBranchHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: New Choice
+      targetNodeID: Node_61ca6
+      branchType: PrefabUIBranchHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+  - graphPosition: {x: 2291.2, y: 100}
+    nextNodeID: Node_9021a
+    nodeID: Node_27bac
+    speakerName: eafe
+    dialogueText: a
+    choices: []
+  - graphPosition: {x: 2291.2, y: 255.20001}
+    nextNodeID: Node_9021a
+    nodeID: Node_61ca6
+    speakerName: faef
+    dialogueText: b
+    choices: []
+  - graphPosition: {x: 3109.6, y: 100}
+    nextNodeID: Node_14f71
+    nodeID: Node_8b362
+    speakerName: fsade
+    dialogueText: a
+    choices: []
+  - graphPosition: {x: 2574.4, y: 100}
+    nextNodeID: 
+    nodeID: Node_9021a
+    speakerName: faefc
+    dialogueText: '[portrait:target=clear,pos=all]'
+    choices:
+    - choiceText: New Choice
+      targetNodeID: Node_8b362
+      branchType: AutoBranchHandler
+      conditionKey: Gold
+      conditionOperator: 2
+      conditionValue: 2
+    - choiceText: New Choice
+      targetNodeID: Node_d3c0b
+      branchType: AutoBranchHandler
+      conditionKey: Gold
+      conditionOperator: 4
+      conditionValue: 1
+  - graphPosition: {x: 3109.6, y: 252}
+    nextNodeID: Node_14f71
+    nodeID: Node_d3c0b
+    speakerName: cfae
+    dialogueText: b
+    choices: []
+  - graphPosition: {x: 3434.4, y: 547.2}
+    nextNodeID: 
+    nodeID: Node_14f71
+    speakerName: 
+    dialogueText: '[end_dialogue:fade=0.5]'
+    choices: []
+  - graphPosition: {x: 626.4, y: 440.8}
+    nextNodeID: Node_14f71
+    nodeID: Node_1bac8
+    speakerName: afcsed
+    dialogueText: '[portrait:target=clear,pos=all]'
+    choices: []
+  - graphPosition: {x: 455.2, y: 255.20001}
+    nextNodeID: Node_6c183
+    nodeID: Node_eb56f
+    speakerName: bbb
+    dialogueText: '[portrait:target=hero,exp=smile,pos=R,fade=0.5,motion=nod]'
+    choices: []
+  - graphPosition: {x: -764.8, y: 100}
+    nextNodeID: 
+    nodeID: Node_60c34
+    speakerName: "\u304D\u306A\u3053\u3055\u3093"
+    dialogueText: '[dialogue_fade:type=in,time=0.5][bgm:name=bg, stop=false][portrait:target=hero,exp=smile,pos=L,Fade=0.5]aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+      gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+      rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr'
+    choices:
+    - choiceText: a
+      targetNodeID: Node_e15cc
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: b
+      targetNodeID: Node_eb56f
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: c
+      targetNodeID: Node_1bac8
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: d
+      targetNodeID: Node_74e5f
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: e
+      targetNodeID: Node_4eff8
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: f
+      targetNodeID: Node_06c1c
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+  - graphPosition: {x: 626.4, y: 616}
+    nextNodeID: Node_14f71
+    nodeID: Node_74e5f
+    speakerName: aefcaef
+    dialogueText: '[portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L][portrait:target=hero,exp=smile,pos=L]'
+    choices: []
+  - graphPosition: {x: 626.4, y: 823.2}
+    nextNodeID: Node_14f71
+    nodeID: Node_4eff8
+    speakerName: shake
+    dialogueText: '[shake:target=canvas,magnitude=50,time=0.5,mode=both]'
+    choices: []
+  - graphPosition: {x: 626.4, y: 1018.4}
+    nextNodeID: Node_c27aa
+    nodeID: Node_06c1c
+    speakerName: "\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3"
+    dialogueText: '[portrait:target=clear,pos=L,fade=1][portrait:target=hero,exp=smile,pos=L,fade=2]'
+    choices: []
+  - graphPosition: {x: 1311.2, y: 1018.4}
+    nextNodeID: Node_635a0
+    nodeID: Node_c27aa
+    speakerName: "\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3"
+    dialogueText: '[portrait:target=clear,pos=L,fade=1][portrait:target=hero,exp=smile,pos=R,fade=2]'
+    choices: []
+  - graphPosition: {x: 1946.4, y: 1018.4}
+    nextNodeID: Node_14f71
+    nodeID: Node_635a0
+    speakerName: 
+    dialogueText: '[portrait:target=clear,pos=all,fade=1]'
+    choices: []
