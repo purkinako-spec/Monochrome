@@ -22,8 +22,35 @@ namespace Runtime.Dialogue.Interaction.Processors
 
         // --- IInteractableProcessor 実装 ---
         public bool CanInteract(GameObject interactor) => !_isDialogueActive && _dialogueContainer != null;
+        
         public string GetInteractionText() => _interactionText;
+        
         public int Priority => _priority;
+
+        // ★ NPCInteractable から設定できるよう public setter を追加
+        public DialogueContainer DialogueContainer 
+        { 
+            get => _dialogueContainer; 
+            set => _dialogueContainer = value; 
+        }
+        
+        public string InteractionText 
+        { 
+            get => _interactionText; 
+            set => _interactionText = value; 
+        }
+        
+        public int Priority 
+        { 
+            get => _priority; 
+            set => _priority = value; 
+        }
+        
+        public bool DestroyAfterDialogue 
+        { 
+            get => _destroyAfterDialogue; 
+            set => _destroyAfterDialogue = value; 
+        }
 
         public void Interact(GameObject interactor)
         {
