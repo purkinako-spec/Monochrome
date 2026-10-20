@@ -25,7 +25,11 @@ namespace Runtime.Dialogue.Interaction.Processors
         
         public string GetInteractionText() => _interactionText;
         
-        public int Priority => _priority;
+        public int Priority 
+        { 
+            get => _priority; 
+            set => _priority = value; 
+        }
 
         // ★ NPCInteractable から設定できるよう public setter を追加
         public DialogueContainer DialogueContainer 
