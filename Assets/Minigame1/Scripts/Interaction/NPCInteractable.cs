@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Runtime.Dialogue.Interaction;
 using Runtime.Dialogue.Interaction.Processors;
 using Runtime.Dialogue.Core;
