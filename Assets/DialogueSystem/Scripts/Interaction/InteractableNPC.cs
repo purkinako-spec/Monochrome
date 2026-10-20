@@ -1,6 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Runtime.Dialogue.Logic;
-using Runtime.Dialogue.Data; // DialogueContainer のネームスペースを追加 (プロジェクト構成に合わせて調整してください)
+using Runtime.Dialogue.Core; // DialogueContainer のネームスペースを追加 (プロジェクト構成に合わせて調整してください)
 
 namespace Runtime.Dialogue.Interaction
 {
@@ -14,8 +14,8 @@ namespace Runtime.Dialogue.Interaction
         [Tooltip("会話データコンテナ (DialogueTesting.testData と同じ型)")]
         [SerializeField] private DialogueContainer _dialogueContainer;
         
-        [Tooltip("開始ノードID (空なら Container のデフォルト)")]
-        [SerializeField] private string _startNodeID = "";
+        //[Tooltip("開始ノードID (空なら Container のデフォルト)")]
+        //[SerializeField] private string _startNodeID = "";
 
         [Header("Interaction")]
         [Tooltip("表示用テキスト (例: '話しかける', '調べる')")]
@@ -49,9 +49,9 @@ namespace Runtime.Dialogue.Interaction
                 Debug.LogError("DialogueManager に View が登録されていません。Player に Interact コンポーネントがアタッチされ、DialogueViewProvider が設定されているか確認してください。", this);
                 return;
             }
-
+            Debug.Log("aaa");
             // 開始ノードIDを指定して会話開始 (DialogueManager の新オーバーロードを使用)
-            manager.StartDialogue(_dialogueContainer, _startNodeID, OnDialogueEnded);
+            manager.StartDialogue(_dialogueContainer, OnDialogueEnded);
         }
 
         /// <summary>
