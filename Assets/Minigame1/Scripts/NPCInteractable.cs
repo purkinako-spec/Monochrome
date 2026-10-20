@@ -1,8 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using Runtime.Dialogue.Interaction;
 
-public class NPCInteractable : MonoBehaviour, IInteractable
+public class NPCInteractable : MonoBehaviour, IInteractableProcessor
 {
-    [SerializeField] private string interactionText = "˜b‚·";
+    [SerializeField] private string interactionText = "è©±ã™";
 
     public string GetInteractionText()
     {
@@ -11,7 +12,7 @@ public class NPCInteractable : MonoBehaviour, IInteractable
 
     public void Interact(GameObject interactor)
     {
-        Debug.Log("NPC‚Æ‚Ì‰ï˜bŠJn");
+        Debug.Log("NPCã¨ã®ä¼šè©±é–‹å§‹");
         SceneLoader sceneLoader = GetComponent<SceneLoader>();
         sceneLoader.LoadScene();
     }
