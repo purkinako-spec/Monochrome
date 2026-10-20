@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 2. 通知を受け取り、自分についている IInteractable 実装スクリプトのメソッドを発火するスクリプト
@@ -49,5 +49,8 @@ public class InteractableTrigger : MonoBehaviour
 /// </summary>
 public interface IInteractable
 {
-    void Interact(GameObject interactor);
+    void Interact(GameObject interactor)
+    {
+        Debug.Log("ggg");
+    }
 }

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
@@ -67,7 +67,6 @@ public class PlayerInputDetector : MonoBehaviour
                 }
             }
         }
-
         // 最も近い対象がいれば通知
         if (bestTarget != null)
         {
