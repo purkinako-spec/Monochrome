@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Runtime.Dialogue.Interaction;
 using Runtime.Dialogue.Interaction.Processors;
 using Runtime.Dialogue.Core;
@@ -8,12 +8,12 @@ namespace MiniGame.Fish.Test2.Interaction
     /// <summary>
     /// NPC会話用のセットアップヘルパーコンポーネント
     /// InteractableReceiver と DialogueProcessor を自動で構成し、インスペクタで会話データを設定できるようにする
-    /// 自身も IInteractableProcessor を実装し、処理を内部の DialogueProcessor に委譲する
+    /// ※ 自身は IInteractableProcessor を実装しない (処理は DialogueProcessor に委譲)
     /// </summary>
     [RequireComponent(typeof(InteractableReceiver))]
     [RequireComponent(typeof(DialogueProcessor))]
     [AddComponentMenu("Interaction/NPC Interactable")]
-    public class NPCInteractable : MonoBehaviour, IInteractableProcessor
+    public class NPCInteractable : MonoBehaviour
     {
         [Header("Dialogue Settings")]
         [Tooltip("会話データコンテナ")]
@@ -23,7 +23,7 @@ namespace MiniGame.Fish.Test2.Interaction
         [SerializeField] private string _interactionText = "話しかける";
 
         [Tooltip("優先度 (他のインタラクトと重なった場合の優先順位)")]
-        [SerializeField] private int _priority = 0;
+        [SerializeField] private int _priority = 10;
 
         [Tooltip("会話終了後にこのオブジェクトを破棄するか")]
         [SerializeField] private bool _destroyAfterDialogue = false;
@@ -37,13 +37,15 @@ namespace MiniGame.Fish.Test2.Interaction
             _receiver = GetComponent<InteractableReceiver>();
             _processor = GetComponent<DialogueProcessor>();
             
-            // 起動時にも同期 (Resetで設定されていない場合やプレハブ上書き時の保険)
+            // 起動時に強制同期 (Receiver -> DialogueProcessor への接続を保証)
             SyncSettingsToProcessor();
         }
 
         private void OnValidate()
         {
             // インスペクタで値変更時に即時反映
+            if (_processor == null) _processor = GetComponent<DialogueProcessor>();
+            if (_receiver == null) _receiver = GetComponent<InteractableReceiver>();
             SyncSettingsToProcessor();
         }
 
@@ -60,17 +62,20 @@ namespace MiniGame.Fish.Test2.Interaction
         /// </summary>
         private void SyncSettingsToProcessor()
         {
-            if (_processor == null) return;
+            if (_processor == null || _receiver == null) return;
 
+            // DialogueProcessor へ設定転送
             _processor.DialogueContainer = _dialogueContainer;
             _processor.InteractionText = _interactionText;
             _processor.Priority = _priority;
             _processor.DestroyAfterDialogue = _destroyAfterDialogue;
 
-            // Receiver の Processor フィールドが未設定なら自動でセット (SerializeReference対応)
-            if (_receiver != null && _receiver.Processor == null)
+            // Receiver の Processor フィールドに DialogueProcessor を強制セット
+            // (InteractableReceiver.Awake より確実に、かつ NPCInteractable 自身がインターフェース実装をやめたため競合しない)
+            if (_receiver.Processor != _processor)
             {
                 _receiver.Processor = _processor;
+                Debug.Log($"[{name}] Receiver.Processor を DialogueProcessor に接続しました", this);
             }
         }
 
@@ -82,21 +87,5 @@ namespace MiniGame.Fish.Test2.Interaction
             _dialogueContainer = container;
             SyncSettingsToProcessor();
         }
-
-        // ============================================================
-        // IInteractableProcessor 実装 (内部 Processor に委譲)
-        // ============================================================
-
-        public bool CanInteract(GameObject interactor) 
-            => _processor != null && _processor.CanInteract(interactor);
-
-        public void Interact(GameObject interactor) 
-            => _processor?.Interact(interactor);
-
-        public string GetInteractionText() 
-            => _processor?.GetInteractionText() ?? _interactionText;
-
-        public int Priority 
-            => _processor?.Priority ?? _priority;
     }
 }

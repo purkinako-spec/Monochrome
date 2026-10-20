@@ -153,6 +153,7 @@ namespace Runtime.Dialogue.Interaction
                 {
                     string processorName = receiver.Processor?.GetType().Name ?? "NULL";
                     string containerName = "N/A";
+                    // Receiver.Processor が直接 DialogueProcessor になっている想定
                     if (receiver.Processor is Runtime.Dialogue.Interaction.Processors.DialogueProcessor dp)
                     {
                         containerName = dp.DialogueContainer ? dp.DialogueContainer.name : "NULL";

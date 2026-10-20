@@ -12,7 +12,6 @@ namespace Runtime.Dialogue.Interaction
     {
         [Header("Processor (Script 3 Implementation)")]
         [Tooltip("このオブジェクトで実行したい具体的な処理(IInteractableProcessor実装)をインスペクタで選択・アサイン")]
-        // [SerializeReference] は UnityEngine.Object 継承クラス (MonoBehaviour等) には使えないため [SerializeField] を使用
         [SerializeField] 
         private IInteractableProcessor _processor;
 
@@ -45,10 +44,24 @@ namespace Runtime.Dialogue.Interaction
             _processor.Interact(interactor);
         }
 
+        private void Awake()
+        {
+            // 実行時にも自動探索してセット (Resetはエディタ専用のため)
+            // NPCInteractable が DialogueProcessor を付与しているため、それが拾われる
+            if (_processor == null)
+            {
+                var found = GetComponent<IInteractableProcessor>();
+                if (found != null) 
+                {
+                    _processor = found;
+                    Debug.Log($"[{name}] Awake: Processor自動設定 -> {_processor.GetType().Name}");
+                }
+            }
+        }
+
         private void Reset()
         {
-            // 同一GameObject上のProcessorを自動探索してセット (利便性向上)
-            // NPCInteractable が DialogueProcessor (MonoBehaviour) を付与しているため、それが拾われる
+            // エディタ上での利便性 (Awakeと同ロジック)
             if (_processor == null)
             {
                 var found = GetComponent<IInteractableProcessor>();
