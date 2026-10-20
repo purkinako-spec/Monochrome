@@ -192,14 +192,28 @@ namespace Runtime.Dialogue.Interaction
         {
             if (_currentBestTarget != null)
             {
-                Debug.Log($"[PlayerInteractor] インタラクト実行: {_currentBestTarget.name} ({_currentBestTarget.Processor.GetType().Name})");
+                // 防御的チェック: Processor が欠落していないか確認 (CanInteract通過済みだが念のため)
+                if (_currentBestTarget.Processor == null)
+                {
+                    Debug.LogError($"[PlayerInteractor] インタラクト実行失敗: {_currentBestTarget.name} の Processor が Null です。", _currentBestTarget);
+                    return;
+                }
+
+                if (_verboseLogging)
+                {
+                    Debug.Log($"[PlayerInteractor] インタラクト実行: {_currentBestTarget.name} ({_currentBestTarget.Processor.GetType().Name})");
+                }
+                
                 _currentBestTarget.Interact(gameObject); // Script 2 経由で Script 3 へ
                 OnInteractPerformed?.Invoke();
             }
             else
             {
                 // ここに来る場合、検出0件 または 全てCanInteract=false
-                Debug.LogWarning("[PlayerInteractor] インタラクト対象なし (検出0件 または 全てCanInteract=false)。上部の詳細ログを確認してください。");
+                if (_verboseLogging)
+                {
+                    Debug.LogWarning("[PlayerInteractor] インタラクト対象なし (検出0件 または 全てCanInteract=false)。上部の詳細ログを確認してください。");
+                }
             }
         }
 
