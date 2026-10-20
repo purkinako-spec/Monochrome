@@ -40,12 +40,6 @@ namespace Runtime.Dialogue.Interaction.Processors
             set => _interactionText = value; 
         }
         
-        public int Priority 
-        { 
-            get => _priority; 
-            set => _priority = value; 
-        }
-        
         public bool DestroyAfterDialogue 
         { 
             get => _destroyAfterDialogue; 

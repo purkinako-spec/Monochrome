@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Runtime.Dialogue.Interaction;
+using MiniGame.Fish.Test2;
 
 public class NPCInteractable : MonoBehaviour, IInteractableProcessor
 {
