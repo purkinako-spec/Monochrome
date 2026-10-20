@@ -17,7 +17,12 @@ namespace Runtime.Dialogue.Interaction
 
         // --- Public API (Script 1 から呼ばれる) ---
 
-        public IInteractableProcessor Processor => _processor;
+        public IInteractableProcessor Processor 
+        { 
+            get => _processor; 
+            set => _processor = value; 
+        }
+        
         public string InteractionText => _processor?.GetInteractionText() ?? "Interact";
         public int Priority => _processor?.Priority ?? 0;
 
