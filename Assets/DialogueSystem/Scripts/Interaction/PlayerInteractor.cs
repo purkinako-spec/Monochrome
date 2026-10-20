@@ -57,6 +57,14 @@ namespace Runtime.Dialogue.Interaction
             }
             try
             {
+                // 既に有効な場合は一度無効化してクリーンアップ (多重登録防止)
+                if (_inputEnabled)
+                {
+                    _interactAction.action.performed -= OnInteractInput;
+                    _interactAction.action.Disable();
+                    _inputEnabled = false;
+                }
+
                 _interactAction.action.Enable();
                 _interactAction.action.performed += OnInteractInput;
                 _inputEnabled = true;
@@ -70,10 +78,32 @@ namespace Runtime.Dialogue.Interaction
 
         private void OnDestroy()
         {
+            CleanupInputAction();
+        }
+
+        private void OnDisable()
+        {
+            // シーン遷移や無効化時にも確実にクリーンアップ
+            CleanupInputAction();
+        }
+
+        private void CleanupInputAction()
+        {
             if (_inputEnabled && _interactAction?.action != null)
             {
-                _interactAction.action.performed -= OnInteractInput;
-                _interactAction.action.Disable();
+                try
+                {
+                    _interactAction.action.performed -= OnInteractInput;
+                    _interactAction.action.Disable();
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[PlayerInteractor] 入力アクションクリーンアップ中にエラー: {e.Message}");
+                }
+                finally
+                {
+                    _inputEnabled = false;
+                }
             }
         }
 
@@ -190,30 +220,39 @@ namespace Runtime.Dialogue.Interaction
         /// </summary>
         private void OnInteractInput(InputAction.CallbackContext ctx)
         {
-            if (_currentBestTarget != null)
+            // ネイティブクラッシュ防止: コールバック内の例外を全てキャッチ
+            try
             {
-                // 防御的チェック: Processor が欠落していないか確認 (CanInteract通過済みだが念のため)
-                if (_currentBestTarget.Processor == null)
+                if (_currentBestTarget != null)
                 {
-                    Debug.LogError($"[PlayerInteractor] インタラクト実行失敗: {_currentBestTarget.name} の Processor が Null です。", _currentBestTarget);
-                    return;
-                }
+                    // 防御的チェック: Processor が欠落していないか確認 (CanInteract通過済みだが念のため)
+                    if (_currentBestTarget.Processor == null)
+                    {
+                        Debug.LogError($"[PlayerInteractor] インタラクト実行失敗: {_currentBestTarget.name} の Processor が Null です。", _currentBestTarget);
+                        return;
+                    }
 
-                if (_verboseLogging)
-                {
-                    Debug.Log($"[PlayerInteractor] インタラクト実行: {_currentBestTarget.name} ({_currentBestTarget.Processor.GetType().Name})");
+                    if (_verboseLogging)
+                    {
+                        Debug.Log($"[PlayerInteractor] インタラクト実行: {_currentBestTarget.name} ({_currentBestTarget.Processor.GetType().Name})");
+                    }
+                    
+                    _currentBestTarget.Interact(gameObject); // Script 2 経由で Script 3 へ
+                    OnInteractPerformed?.Invoke();
                 }
-                
-                _currentBestTarget.Interact(gameObject); // Script 2 経由で Script 3 へ
-                OnInteractPerformed?.Invoke();
+                else
+                {
+                    // ここに来る場合、検出0件 または 全てCanInteract=false
+                    if (_verboseLogging)
+                    {
+                        Debug.LogWarning("[PlayerInteractor] インタラクト対象なし (検出0件 または 全てCanInteract=false)。上部の詳細ログを確認してください。");
+                    }
+                }
             }
-            else
+            catch (System.Exception e)
             {
-                // ここに来る場合、検出0件 または 全てCanInteract=false
-                if (_verboseLogging)
-                {
-                    Debug.LogWarning("[PlayerInteractor] インタラクト対象なし (検出0件 または 全てCanInteract=false)。上部の詳細ログを確認してください。");
-                }
+                // ここで例外を握りつぶさずログ出力し、ネイティブ層に伝播させない
+                Debug.LogException(new System.Exception($"[PlayerInteractor] インタラクト処理中に例外発生 (ネイティブクラッシュ防止のため捕捉)", e), this);
             }
         }
 
