@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
-using System.Linq;
 using Runtime.Dialogue.Interaction;
 
 namespace Runtime.Dialogue.Interaction
@@ -16,7 +15,7 @@ namespace Runtime.Dialogue.Interaction
         [Header("Detection Settings")]
         [Tooltip("検出半径")]
         [SerializeField] private float _detectionRadius = 1.5f;
-        [Tooltip("インタラクト可能なレイヤー")]
+        [Tooltip("インタラクト可能なレイヤー (NPCのレイヤーが含まれているか確認)")]
         [SerializeField] private LayerMask _interactableLayer;
         [Tooltip("検出中心 (未指定なら自身のTransform)")]
         [SerializeField] private Transform _detectionCenter;
@@ -27,6 +26,8 @@ namespace Runtime.Dialogue.Interaction
 
         [Header("Debug")]
         [SerializeField] private bool _showGizmos = true;
+        [Tooltip("詳細ログを出力する (原因特定用)")]
+        [SerializeField] private bool _verboseLogging = true;
 
         private List<InteractableReceiver> _detectedReceivers = new List<InteractableReceiver>();
         private InteractableReceiver _currentBestTarget;
@@ -92,16 +93,37 @@ namespace Runtime.Dialogue.Interaction
 
             int count = Physics2D.OverlapCircleNonAlloc(_detectionCenter.position, _detectionRadius, _overlapBuffer, _interactableLayer);
             
+            if (_verboseLogging && count > 0)
+            {
+                Debug.Log($"[PlayerInteractor] Overlap検出: {count}個 (半径:{_detectionRadius}, レイヤーマスク:{_interactableLayer.value}, 中心:{_detectionCenter.position})");
+            }
+
             for (int i = 0; i < count; i++)
             {
                 var col = _overlapBuffer[i];
                 if (col == null) continue;
 
+                if (_verboseLogging)
+                {
+                    Debug.Log($"  - Collider: {col.name} (Layer: {LayerMask.LayerToName(col.gameObject.layer)}, IsTrigger: {col.isTrigger})", col);
+                }
+
                 // 親も含めて Receiver を探す
                 var receiver = col.GetComponentInParent<InteractableReceiver>();
-                if (receiver != null && !_detectedReceivers.Contains(receiver))
+                if (receiver != null)
                 {
-                    _detectedReceivers.Add(receiver);
+                    if (!_detectedReceivers.Contains(receiver))
+                    {
+                        _detectedReceivers.Add(receiver);
+                        if (_verboseLogging)
+                        {
+                            Debug.Log($"    -> InteractableReceiver 発見: {receiver.name} (Processor: {receiver.Processor?.GetType().Name ?? "NULL"})", receiver);
+                        }
+                    }
+                }
+                else if (_verboseLogging)
+                {
+                    Debug.Log($"    -> InteractableReceiver なし (親階層にもなし)", col);
                 }
             }
         }
@@ -117,11 +139,29 @@ namespace Runtime.Dialogue.Interaction
 
             foreach (var receiver in _detectedReceivers)
             {
-                if (receiver == null || !receiver.CanInteract(gameObject)) continue;
+                if (receiver == null) 
+                {
+                    if (_verboseLogging) Debug.Log($"[PlayerInteractor] 評価スキップ: ReceiverがNull");
+                    continue; 
+                }
 
+                bool canInteract = receiver.CanInteract(gameObject);
                 float dist = Vector2.Distance(centerPos, receiver.transform.position);
-                // スコア = 優先度 * 1000 - 距離 (優先度を強く反映)
                 float score = receiver.Priority * 1000f - dist;
+
+                if (_verboseLogging)
+                {
+                    string processorName = receiver.Processor?.GetType().Name ?? "NULL";
+                    string containerName = "N/A";
+                    if (receiver.Processor is Runtime.Dialogue.Interaction.Processors.DialogueProcessor dp)
+                    {
+                        containerName = dp.DialogueContainer ? dp.DialogueContainer.name : "NULL";
+                    }
+                    
+                    Debug.Log($"[PlayerInteractor] 評価: {receiver.name} | CanInteract: {canInteract} | Priority: {receiver.Priority} | Dist: {dist:F2} | Score: {score:F2} | Processor: {processorName} | Container: {containerName}");
+                }
+
+                if (!canInteract) continue;
 
                 if (score > bestScore)
                 {
@@ -133,6 +173,13 @@ namespace Runtime.Dialogue.Interaction
             if (_currentBestTarget != best)
             {
                 _currentBestTarget = best;
+                if (_verboseLogging)
+                {
+                    if (best != null)
+                        Debug.Log($"[PlayerInteractor] ターゲット決定: {best.name} (Score: {bestScore:F2})", best);
+                    else
+                        Debug.Log($"[PlayerInteractor] ターゲットクリア (有効な対象なし)");
+                }
                 OnTargetChanged?.Invoke(_currentBestTarget);
             }
         }
@@ -150,7 +197,8 @@ namespace Runtime.Dialogue.Interaction
             }
             else
             {
-                Debug.Log("[PlayerInteractor] インタラクト対象なし");
+                // ここに来る場合、検出0件 または 全てCanInteract=false
+                Debug.LogWarning("[PlayerInteractor] インタラクト対象なし (検出0件 または 全てCanInteract=false)。上部の詳細ログを確認してください。");
             }
         }
 
