@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Runtime.Dialogue.Logic;
-using Runtime.Dialogue.Core; // DialogueContainer のネームスペースを追加 (プロジェクト構成に合わせて調整してください)
+using Runtime.Dialogue.Core;
 
 namespace Runtime.Dialogue.Interaction
 {
@@ -25,10 +25,18 @@ namespace Runtime.Dialogue.Interaction
         [Tooltip("会話終了後にオブジェクトを破棄するか (テスト用など)")]
         [SerializeField] private bool _destroyAfterDialogue = false;
 
+        private bool _isDialogueActive = false;
+
         public string GetInteractionText() => _interactionText;
 
         public void Interact(GameObject interactor)
         {
+            if (_isDialogueActive)
+            {
+                Debug.Log($"[{name}] 会話中のためスキップ");
+                return;
+            }
+
             if (_dialogueContainer == null)
             {
                 Debug.LogWarning($"[{name}] DialogueContainer が未設定です。", this);
@@ -38,19 +46,46 @@ namespace Runtime.Dialogue.Interaction
             var manager = DialogueManager.Instance;
             if (manager == null)
             {
-                Debug.LogError("DialogueManager.Instance が見つかりません。シーンに配置されているか確認してください。", this);
+                Debug.LogError("DialogueManager.Instance が見つかりません。シーンに DialogueManager が配置されているか確認してください。", this);
                 return;
             }
 
-            // View の登録は Interact.cs (Player側) の Awake で完了している想定。
-            // ここでは Manager に View があるかのみチェックし、なければエラーにする（設計上のミスを検知しやすくするため）。
+            // View の登録待機 (最大1秒)
             if (manager.CurrentView == null)
             {
-                Debug.LogError("DialogueManager に View が登録されていません。Player に Interact コンポーネントがアタッチされ、DialogueViewProvider が設定されているか確認してください。", this);
+                Debug.LogWarning("DialogueManager に View が未登録です。1秒待機してリトライします。");
+                StartCoroutine(WaitForViewAndStartDialogue(manager));
                 return;
             }
-            Debug.Log("aaa");
-            // 開始ノードIDを指定して会話開始 (DialogueManager の新オーバーロードを使用)
+
+            StartDialogueInternal(manager);
+        }
+
+        private System.Collections.IEnumerator WaitForViewAndStartDialogue(DialogueManager manager)
+        {
+            float timer = 0f;
+            while (manager.CurrentView == null && timer < 1f)
+            {
+                timer += Time.deltaTime;
+                yield return null;
+            }
+
+            if (manager.CurrentView != null)
+            {
+                StartDialogueInternal(manager);
+            }
+            else
+            {
+                Debug.LogError("DialogueManager に View が登録されませんでした。Player に Interact コンポーネントと DialogueViewProvider が正しく設定されているか確認してください。", this);
+            }
+        }
+
+        private void StartDialogueInternal(DialogueManager manager)
+        {
+            _isDialogueActive = true;
+            Debug.Log($"[{name}] 会話開始: {_dialogueContainer.name}");
+            
+            // 会話開始 (終了コールバックで _isDialogueActive を false に戻す)
             manager.StartDialogue(_dialogueContainer, OnDialogueEnded);
         }
 
@@ -59,6 +94,7 @@ namespace Runtime.Dialogue.Interaction
         /// </summary>
         private void OnDialogueEnded()
         {
+            _isDialogueActive = false;
             Debug.Log($"[{name}] 会話が終了しました。");
 
             if (_destroyAfterDialogue)

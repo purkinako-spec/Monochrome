@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class InteractionController : MonoBehaviour
 {
@@ -7,6 +7,14 @@ public class InteractionController : MonoBehaviour
 
     private IInteractable currentInteractable;
 
+    private void Awake()
+    {
+        // ★★★ このコンポーネントを無効化して競合を防止 ★★★
+        Debug.LogWarning("[InteractionController] DialogueSystemのInteract.csを使用するため、このコンポーネントを無効化しました。", this);
+        enabled = false;
+    }
+
+    // 以下は無効化されるため実行されませんが、念のため残しておきます
     private void Update()
     {
         FindInteractable();

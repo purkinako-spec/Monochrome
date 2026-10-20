@@ -25,21 +25,40 @@ namespace Runtime.Dialogue.Interaction
 
         private IInteractable _currentTarget;
         private Collider2D[] _overlapBuffer = new Collider2D[10];
+        private bool _inputEnabled = false;
 
         private void Awake()
         {
             if (_detectionCenter == null) _detectionCenter = transform;
 
-            if (_interactAction != null)
+            // InputActionReference の検証
+            if (_interactAction == null)
+            {
+                Debug.LogError("[Interact] _interactAction が未設定です。インスペクタで InputActionAsset の 'Player/Interact' 等を割り当ててください。", this);
+                return;
+            }
+            if (_interactAction.action == null)
+            {
+                Debug.LogError("[Interact] _interactAction.action が null です。InputActionAsset が正しく設定されているか確認してください。", this);
+                return;
+            }
+
+            try
             {
                 _interactAction.action.Enable();
                 _interactAction.action.performed += OnInteractInput;
+                _inputEnabled = true;
+                Debug.Log($"[Interact] 入力アクション有効化完了: {_interactAction.action.actionMap?.name}/{_interactAction.action.name}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Interact] 入力アクション有効化失敗: {e.Message}", this);
             }
         }
 
         private void OnDestroy()
         {
-            if (_interactAction != null)
+            if (_inputEnabled && _interactAction != null && _interactAction.action != null)
             {
                 _interactAction.action.performed -= OnInteractInput;
                 _interactAction.action.Disable();
@@ -56,6 +75,8 @@ namespace Runtime.Dialogue.Interaction
         /// </summary>
         private void DetectNearestInteractable()
         {
+            if (_detectionCenter == null) return;
+
             int count = Physics2D.OverlapCircleNonAlloc(_detectionCenter.position, _detectionRadius, _overlapBuffer, _interactableLayer);
 
             IInteractable nearest = null;
@@ -64,6 +85,8 @@ namespace Runtime.Dialogue.Interaction
             for (int i = 0; i < count; i++)
             {
                 var col = _overlapBuffer[i];
+                if (col == null) continue;
+
                 var interactable = col.GetComponentInParent<IInteractable>();
                 
                 if (interactable != null)
@@ -85,13 +108,19 @@ namespace Runtime.Dialogue.Interaction
         }
 
         /// <summary>
-        /// インタラクト入力検知 → 対象の Interact() を呼び出し (会話開始等は対象側で Manager.StartDialogue を叩く)
+        /// インタラクト入力検知 → 対象の Interact() を呼び出し
         /// </summary>
         private void OnInteractInput(InputAction.CallbackContext ctx)
         {
+            Debug.Log("[Interact] インタラクト入力検知");
             if (_currentTarget != null)
             {
+                Debug.Log($"[Interact] 対象とインタラクト実行: {_currentTarget.GetInteractionText()}");
                 _currentTarget.Interact(gameObject);
+            }
+            else
+            {
+                Debug.Log("[Interact] インタラクト対象なし");
             }
         }
 
@@ -103,10 +132,12 @@ namespace Runtime.Dialogue.Interaction
             if (newTarget != null)
             {
                 Debug.Log($"[Interact] 対象検出: {newTarget.GetInteractionText()}");
+                // TODO: UIプロンプト表示処理をここに追加 (例: InteractionPromptUI.Show(newTarget.GetInteractionText()))
             }
             else
             {
                 Debug.Log("[Interact] 対象なし");
+                // TODO: UIプロンプト非表示処理
             }
         }
 
