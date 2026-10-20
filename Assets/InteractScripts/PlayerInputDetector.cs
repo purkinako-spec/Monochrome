@@ -1,16 +1,19 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 1. プレイヤーの入力を監視し、範囲内の InteractableTrigger に通知を送るスクリプト
-/// Player にアタッチして使用する
+/// 1. 入力を監視し、押下時に周囲の InteractableTrigger を物理検索し、
+/// 「自分が範囲内にいる(IsInteractorInside)かつ最も近い」ものを実行する
+/// Player にアタッチ
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class PlayerInputDetector : MonoBehaviour
 {
     [Header("Detection Settings")]
-    [SerializeField] private float detectionRadius = 1.5f;
-    [SerializeField] private LayerMask interactableLayer;
+    [Tooltip("検索半径 (トリガー判定の補助用。これより遠いと無視)")]
+    [SerializeField] private float searchRadius = 2f;
+    [Tooltip("InteractableTrigger がいるレイヤー")]
+    [SerializeField] private LayerMask triggerLayer;
     [SerializeField] private Transform detectionCenter;
 
     [Header("Input")]
@@ -44,8 +47,8 @@ public class PlayerInputDetector : MonoBehaviour
 
     private void OnInteractPerformed(InputAction.CallbackContext ctx)
     {
-        // 範囲内の Collider を検出
-        int count = Physics2D.OverlapCircleNonAlloc(detectionCenter.position, detectionRadius, _overlapBuffer, interactableLayer);
+        // 1. 物理検索で周囲の InteractableTrigger 候補を取得
+        int count = Physics2D.OverlapCircleNonAlloc(detectionCenter.position, searchRadius, _overlapBuffer, triggerLayer);
         
         float minDist = float.MaxValue;
         InteractableTrigger bestTarget = null;
@@ -55,29 +58,40 @@ public class PlayerInputDetector : MonoBehaviour
             var col = _overlapBuffer[i];
             if (col == null) continue;
 
-            // 親階層も含めて InteractableTrigger を探す
             var trigger = col.GetComponentInParent<InteractableTrigger>();
-            if (trigger != null)
+            if (trigger == null) continue;
+
+            // 2. NPC側のトリガー判定で「自分が範囲内か」を確認 (ここが核心)
+            if (!trigger.IsInteractorInside(gameObject)) continue;
+
+            // 3. 距離で最も近いものを選択
+            float dist = Vector2.Distance(detectionCenter.position, trigger.transform.position);
+            if (dist < minDist)
             {
-                float dist = Vector2.Distance(detectionCenter.position, trigger.transform.position);
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    bestTarget = trigger;
-                }
+                minDist = dist;
+                bestTarget = trigger;
             }
         }
-        // 最も近い対象がいれば通知
+
+        // 4. 実行
         if (bestTarget != null)
         {
-            bestTarget.OnInteractRequested(gameObject);
+            bestTarget.ExecuteInteract(gameObject);
+        }
+        else
+        {
+            // デバッグ用: 近くにいたが範囲外だった、またはトリガーがなかった
+            if (_verboseLogging) Debug.Log("[PlayerInputDetector] 有効なインタラクト対象なし (範囲外 or 見つからず)");
         }
     }
+
+    [Header("Debug")]
+    [SerializeField] private bool _verboseLogging = false;
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(0, 1, 1, 0.3f);
         Vector3 center = detectionCenter ? detectionCenter.position : transform.position;
-        Gizmos.DrawWireSphere(center, detectionRadius);
+        Gizmos.DrawWireSphere(center, searchRadius);
     }
 }
