@@ -82,7 +82,7 @@ public class InteractableTrigger : MonoBehaviour
 }
 
 /// <summary>
-/// インタラクト可能なオブジェクトが実装するインターフェース
+/// インタラクト可能なオブジェクトが実装するインターフェース (旧Triggerシステム用・グローバル名前空間)
 /// </summary>
 public interface IInteractable
 {
