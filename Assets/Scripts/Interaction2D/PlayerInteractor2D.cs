@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,43 +6,56 @@ namespace InteractionSystem2D
 {
     /// <summary>
     /// プレイヤー側のインタラクト検知・実行コンポーネント。
-    /// - 検知用コライダー（IsTrigger=true）を別途アサインして使用する設計に変更
-    /// - メインの物理コライダー（IsTrigger=false）は触らないため、壁やNPCとすり抜けなくなる
+    /// - Input System の複数アクションを監視し、論理キーに変換して対象に渡す
+    /// - 対象オブジェクトが要求する論理キーと一致した場合のみインタラクト実行
+    /// - 検知用コライダー（IsTrigger=true）を別途アサインして使用
     /// </summary>
-    [RequireComponent(typeof(Collider2D))] // メインの物理コライダー（身体）が必須
+    [RequireComponent(typeof(Collider2D))]
     public class PlayerInteractor2D : MonoBehaviour
     {
         [Header("検知設定")]
-        [Tooltip("インタラクト判定対象のレイヤー（専用レイヤーを推奨）")]
+        [Tooltip("インタラクト判定対象のレイヤー")]
         [SerializeField] private LayerMask interactableLayerMask;
 
-        [Tooltip("検知用コライダー（IsTrigger=true の別コライダー、または子オブジェクトのコライダーを指定）。未指定の場合はこのオブジェクトのコライダーを使用しますが、物理判定と干渉しないよう別コライダー推奨。")]
+        [Tooltip("検知用コライダー（IsTrigger=true の別コライダー推奨）。未指定なら自身のコライダーを使用（警告が出ます）")]
         [SerializeField] private Collider2D detectionCollider;
 
-        [Tooltip("OverlapCircleを使用する場合の半径（Colliderを使わない場合）")]
+        [Tooltip("OverlapCircle使用時の半径（Collider未使用時）")]
         [SerializeField] private float detectionRadius = 1.5f;
 
-        [Tooltip("true: 物理コライダー(Trigger)で検知 / false: Physics2D.OverlapCircleで毎フレーム検知")]
+        [Tooltip("true: Trigger検知 / false: OverlapCircle検知")]
         [SerializeField] private bool useTriggerCollider = true;
+
+        [Header("入力・キー設定")]
+        [Tooltip("InputAction名 -> 論理キー名 のマッピング。\n例: Action「Interact」-> Key「Interact」、Action「Talk」-> Key「Talk」")]
+        [SerializeField] private List<ActionKeyMapping> actionKeyMappings = new List<ActionKeyMapping>
+        {
+            new ActionKeyMapping { actionName = "Interact", logicalKey = "Interact" },
+            new ActionKeyMapping { actionName = "Talk", logicalKey = "Talk" }
+        };
 
         [Header("デバッグ")]
         [SerializeField] private bool showDebugGizmos = true;
 
-        // 現在範囲内にあるインタラクト可能オブジェクトの候補
+        // 内部状態
         private readonly List<IInteractable2D> _candidates = new List<IInteractable2D>();
-        // 現在選択中（最も近い）のインタラクト対象
         private IInteractable2D _currentTarget;
-        // 検知用コライダー（Trigger用）
         private Collider2D _activeDetectionCollider;
-        // Input Action参照
-        private InputAction _interactAction;
+        private PlayerInput _playerInput;
+        private readonly Dictionary<string, InputAction> _actionMap = new Dictionary<string, InputAction>();
+        private readonly Dictionary<InputAction, string> _actionToLogicalKey = new Dictionary<InputAction, string>();
+
+        [System.Serializable]
+        public class ActionKeyMapping
+        {
+            public string actionName;   // Input Actions アセットで定義したアクション名
+            public string logicalKey;   // IInteractable2D.RequiredKey と一致させる論理キー
+        }
 
         private void Awake()
         {
-            // 検知用コライダーの決定
             _activeDetectionCollider = detectionCollider != null ? detectionCollider : GetComponent<Collider2D>();
 
-            // 検知用コライダーが設定されている場合、強制的にTriggerにする
             if (useTriggerCollider && _activeDetectionCollider != null)
             {
                 if (!_activeDetectionCollider.isTrigger)
@@ -51,63 +64,56 @@ namespace InteractionSystem2D
                     _activeDetectionCollider.isTrigger = true;
                 }
             }
-            // 検知用コライダーがメインのコライダーと同一の場合、警告（すり抜けの原因になるため）
             else if (_activeDetectionCollider == GetComponent<Collider2D>())
             {
-                /*Debug.LogWarning("[PlayerInteractor2D] 検知用コライダーがメインの物理コライダーと同一です。" +
-                                 "物理衝突（壁あたり判定）が無効化され、すり抜けの原因になります。" +
-                                 "子オブジェクトに別途 CircleCollider2D (IsTrigger=ON) を作成し、Detection Collider にアサインすることを強く推奨します。", this);
-                */
+                Debug.LogWarning("[PlayerInteractor2D] 検知用コライダーがメインの物理コライダーと同一です。物理衝突が無効化されすり抜けの原因になります。子オブジェクトに別途 Trigger コライダーを作成しアサインしてください。", this);
             }
 
-            // Input Systemのアクションを取得
-            var playerInput = GetComponent<PlayerInput>();
-            if (playerInput != null)
+            _playerInput = GetComponent<PlayerInput>();
+            if (_playerInput == null || _playerInput.actions == null)
             {
-                _interactAction = playerInput.actions["Interact"];
+                Debug.LogError("[PlayerInteractor2D] PlayerInput コンポーネントまたは Actions アセットが見つかりません。", this);
+                return;
             }
 
-            if (_interactAction == null)
+            // アクションの取得とマッピング構築
+            foreach (var mapping in actionKeyMappings)
             {
-                Debug.LogWarning("[PlayerInteractor2D] 'Interact' アクションが見つかりません。PlayerInput の Actions またはインスペクタで設定してください。");
+                var action = _playerInput.actions.FindAction(mapping.actionName);
+                if (action != null)
+                {
+                    _actionMap[mapping.actionName] = action;
+                    _actionToLogicalKey[action] = mapping.logicalKey;
+                    action.performed += OnActionPerformed;
+                    action.Enable();
+                }
+                else
+                {
+                    Debug.LogWarning($"[PlayerInteractor2D] アクション '{mapping.actionName}' が Input Actions に見つかりません。", this);
+                }
             }
         }
 
-        private void OnEnable()
+        private void OnDestroy()
         {
-            if (_interactAction != null)
+            foreach (var kvp in _actionToLogicalKey)
             {
-                _interactAction.performed += OnInteractPerformed;
-                _interactAction.Enable();
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (_interactAction != null)
-            {
-                _interactAction.performed -= OnInteractPerformed;
-                _interactAction.Disable();
+                kvp.Key.performed -= OnActionPerformed;
             }
         }
 
         private void FixedUpdate()
         {
-            // OverlapCircleモードの場合、毎フレーム（FixedUpdate）で最近傍を再計算
             if (!useTriggerCollider)
             {
                 RefreshNearestTarget();
             }
         }
 
-        /// <summary>
-        /// Triggerモード時：範囲内に入ったオブジェクトを候補に追加
-        /// </summary>
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // このスクリプトがアタッチされているコライダー（検知用）以外からのイベントは無視
             if (!useTriggerCollider) return;
-            if (other != _activeDetectionCollider) return; // 自身の検知コライダー以外のTriggerイベントを無視
+            if (other != _activeDetectionCollider) return;
             if (!IsInInteractableLayer(other.gameObject.layer)) return;
 
             var interactable = other.GetComponent<IInteractable2D>();
@@ -118,9 +124,6 @@ namespace InteractionSystem2D
             }
         }
 
-        /// <summary>
-        /// Triggerモード時：範囲外に出たオブジェクトを候補から除外
-        /// </summary>
         private void OnTriggerExit2D(Collider2D other)
         {
             if (!useTriggerCollider) return;
@@ -135,26 +138,29 @@ namespace InteractionSystem2D
         }
 
         /// <summary>
-        /// 入力イベント（performed）から呼ばれるインタラクト実行
+        /// 入力アクション実行時の共通ハンドラ
         /// </summary>
-        private void OnInteractPerformed(InputAction.CallbackContext context)
+        private void OnActionPerformed(InputAction.CallbackContext context)
         {
-            if (_currentTarget != null)
+            if (_currentTarget == null) return;
+
+            // 実行されたアクションに対応する論理キーを取得
+            if (_actionToLogicalKey.TryGetValue(context.action, out string logicalKey))
             {
-                _currentTarget.Interact();
+                // 対象がそのキーを処理できるか試行
+                if (_currentTarget.TryInteract(logicalKey))
+                {
+                    // 処理された場合、必要ならここでエフェクトやサウンドを鳴らす
+                }
             }
         }
 
-        /// <summary>
-        /// 候補リストから「プレイヤーに最も近い」オブジェクトを1つ選択して _currentTarget に設定
-        /// </summary>
         private void RefreshNearestTarget()
         {
             IInteractable2D nearest = null;
             float minDistSqr = float.MaxValue;
-            Vector2 playerPos = transform.position; // プレイヤーの中心座標を基準に距離計算
+            Vector2 playerPos = transform.position;
 
-            // OverlapCircleモードの場合、ここで物理クエリを実行して候補を更新
             if (!useTriggerCollider)
             {
                 _candidates.Clear();
@@ -162,14 +168,10 @@ namespace InteractionSystem2D
                 foreach (var hit in hits)
                 {
                     var interactable = hit.GetComponent<IInteractable2D>();
-                    if (interactable != null)
-                    {
-                        _candidates.Add(interactable);
-                    }
+                    if (interactable != null) _candidates.Add(interactable);
                 }
             }
 
-            // 候補の中から最近傍を選択
             foreach (var candidate in _candidates)
             {
                 if (candidate is Component comp)
@@ -186,17 +188,11 @@ namespace InteractionSystem2D
             _currentTarget = nearest;
         }
 
-        /// <summary>
-        /// レイヤーが判定対象マスクに含まれるか判定
-        /// </summary>
         private bool IsInInteractableLayer(int layer)
         {
             return (interactableLayerMask.value & (1 << layer)) != 0;
         }
 
-        /// <summary>
-        /// 現在のターゲットを外部（UI等）から取得するためのプロパティ
-        /// </summary>
         public IInteractable2D CurrentTarget => _currentTarget;
 
         private void OnDrawGizmosSelected()

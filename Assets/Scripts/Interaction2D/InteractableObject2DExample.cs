@@ -3,35 +3,63 @@ using UnityEngine;
 namespace InteractionSystem2D
 {
     /// <summary>
-    /// IInteractable2D のシンプルなサンプル実装（看板、NPC、宝箱等を想定）。
-    /// アタッチ時に自動でレイヤーを "Interactable" に設定する。
-    /// ※ コライダーの IsTrigger は自動で変更しません（物理衝突が必要なため）。
-    /// 検知のみ行いたい場合はインスペクタで手動で IsTrigger を ON にしてください。
+    /// IInteractable2D のサンプル実装。
+    /// インスペクタで「必要な論理キー」を指定し、一致した場合のみ反応する。
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class InteractableObject2DExample : MonoBehaviour, IInteractable2D
     {
         [Header("インタラクト設定")]
-        [Tooltip("UIに表示されるテキスト（例: 'Eキーで読む', 'Eキーで話す' 等）")]
-        [SerializeField] private string interactText = "Eキーでインタラクト";
+        [Tooltip("このオブジェクトが反応する論理キー名（PlayerInteractor2D の ActionKeyMapping.logicalKey と一致させる）\n例: Interact, Talk, Inspect, Open")]
+        [SerializeField] private string requiredKey = "Interact";
 
-        [Tooltip("インタラクト可能かどうか（フラグ管理等で動的に切り替え可能）")]
+        [Tooltip("UIに表示されるプロンプトテキスト（キー名部分は実行時のバインディングに合わせて動的に変えたい場合は別途実装が必要）")]
+        [SerializeField] private string interactPrompt = "[E] 調べる";
+
+        [Tooltip("インタラクト可能かどうか")]
         [SerializeField] private bool isInteractable = true;
 
         [Header("内部参照")]
         [SerializeField] private Collider2D _collider;
 
+        // --- IInteractable2D 実装 ---
+
+        public string RequiredKey => requiredKey;
+
+        public bool TryInteract(string key)
+        {
+            if (!isInteractable) return false;
+            if (key != requiredKey) return false; // キーが一致しない場合は処理しない
+
+            Interact();
+            return true; // 処理した
+        }
+
+        public string GetInteractPrompt()
+        {
+            return isInteractable ? interactPrompt : string.Empty;
+        }
+
         /// <summary>
-        /// エディタでアタッチ/リセット時に自動設定される
+        /// 実際のインタラクト処理（オーバーライドやイベントで拡張想定）
         /// </summary>
+        protected virtual void Interact()
+        {
+            Debug.Log($"<color=cyan>[Interact]</color> {gameObject.name} がキー '{requiredKey}' でインタラクトされました。", this);
+        }
+
+        public void SetInteractable(bool state)
+        {
+            isInteractable = state;
+        }
+
+        // --- Unity Lifecycle ---
+
         private void Reset()
         {
             _collider = GetComponent<Collider2D>();
 
-            // 1. コライダーを Trigger に設定 しない（物理衝突させるため）
-            // 必要ならインスペクタで手動でチェックを入れてください。
-
-            // 2. レイヤーを "Interactable" に設定（存在しない場合は警告）
+            // レイヤー自動設定
             int interactableLayer = LayerMask.NameToLayer("Interactable");
             if (interactableLayer != -1)
             {
@@ -39,40 +67,13 @@ namespace InteractionSystem2D
             }
             else
             {
-                Debug.LogWarning($"[InteractableObject2DExample] 'Interactable' レイヤーがプロジェクトに存在しません。\n" +
-                                 $"Edit > Project Settings > Tags and Layers で Layer 6 などに 'Interactable' を追加してください。", this);
+                Debug.LogWarning($"[InteractableObject2DExample] 'Interactable' レイヤーが存在しません。Project Settings > Tags and Layers で追加してください。", this);
             }
         }
 
         private void OnValidate()
         {
-            // インスペクタ値変更時の自動制御は行わない（物理設定は手動管理推奨）
-        }
-
-        // --- IInteractable2D 実装 ---
-
-        public void Interact()
-        {
-            if (!isInteractable) return;
-
-            // ここに実際の処理を記述（会話開始、アイテム取得、シーン遷移等）
-            Debug.Log($"<color=cyan>[Interact]</color> {gameObject.name} がインタラクトされました。", this);
-
-            // 例: 一度きりのインタラクトなら無効化
-            // isInteractable = false;
-        }
-
-        public string GetInteractText()
-        {
-            return isInteractable ? interactText : string.Empty;
-        }
-
-        /// <summary>
-        /// 外部からインタラクト可否を切り替える場合に使用
-        /// </summary>
-        public void SetInteractable(bool state)
-        {
-            isInteractable = state;
+            // 物理設定は手動管理推奨のため自動変更しない
         }
     }
 }
