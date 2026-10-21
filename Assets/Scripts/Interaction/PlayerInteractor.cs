@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
@@ -106,7 +106,7 @@ public class PlayerInteractor : MonoBehaviour
                 || _raycastHit.transform.GetComponentInParent<IInteractable>() is IInteractable parentInteractable) // 親検索は TryGetComponent できないためパターンマッチングで null チェック
             {
                 // 親から見つかった場合はそれを優先
-                IInteractable found = interactable ?? parentInteractable;
+                IInteractable found = interactable ?? yparentInteractable;
 
                 // 対象が変わった時のみ更新 (無駄な代入・UI更新を防ぐ)
                 if (_currentInteractable != found)
