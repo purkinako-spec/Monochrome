@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,13 +6,11 @@ namespace InteractionSystem2D
 {
     /// <summary>
     /// プレイヤー側のインタラクト検知・実行コンポーネント。
-    /// - PlayerInput の標準的な仕組み（C# イベント）を使用
-    /// - アクション名をそのまま「論理キー」として扱う（規約ベース：Action名 == LogicalKey）
-    /// - 別途マッピングリストをインスペクタで設定する必要なし
+    /// - インスペクタで InputActionReference と 論理キー名 の組み合わせを複数登録可能
+    /// - 登録されたアクションのみを購読し、実行時に論理キーとして対象に渡す
     /// - 検知用コライダー（IsTrigger=true）を別途アサインして使用
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
-    [RequireComponent(typeof(PlayerInput))]
     public class PlayerInteractor2D : MonoBehaviour
     {
         [Header("検知設定")]
@@ -30,21 +27,28 @@ namespace InteractionSystem2D
         [SerializeField] private bool useTriggerCollider = true;
 
         [Header("入力設定")]
-        [Tooltip("監視するアクションマップ名（空の場合は全マップの全アクションを監視）")]
-        [SerializeField] private string targetActionMapName = "Player";
+        [Tooltip("入力アクションと論理キー名のマッピングリスト。\n例: Action「Interact」-> Key「Interact」、Action「Talk」-> Key「Talk」")]
+        [SerializeField] private List<ActionKeyMapping> actionKeyMappings = new List<ActionKeyMapping>();
 
         [Header("デバッグ")]
         [SerializeField] private bool showDebugGizmos = true;
-
-        public InputActionReference action;
 
         // 内部状態
         private readonly List<IInteractable2D> _candidates = new List<IInteractable2D>();
         private IInteractable2D _currentTarget;
         private Collider2D _activeDetectionCollider;
-        private PlayerInput _playerInput;
         private readonly Dictionary<InputAction, string> _actionToLogicalKey = new Dictionary<InputAction, string>();
         private bool _isSubscribed = false;
+
+        [System.Serializable]
+        public class ActionKeyMapping
+        {
+            [Tooltip("Input Actions アセットで定義したアクションへの参照")]
+            public InputActionReference actionReference;
+
+            [Tooltip("このアクションが実行されたときに渡す論理キー名（IInteractable2D.RequiredKey と一致させる）")]
+            public string logicalKey;
+        }
 
         private void Awake()
         {
@@ -62,17 +66,10 @@ namespace InteractionSystem2D
             {
                 Debug.LogWarning("[PlayerInteractor2D] 検知用コライダーがメインの物理コライダーと同一です。物理衝突が無効化されすり抜けの原因になります。子オブジェクトに別途 Trigger コライダーを作成しアサインしてください。", this);
             }
-
-            _playerInput = GetComponent<PlayerInput>();
-            if (_playerInput == null)
-            {
-                Debug.LogError("[PlayerInteractor2D] PlayerInput コンポーネントが見つかりません。", this);
-            }
         }
 
         private void Start()
         {
-            // PlayerInput の Actions 初期化完了を待って購読
             SubscribeActions();
         }
 
@@ -88,52 +85,52 @@ namespace InteractionSystem2D
 
         private void OnEnable()
         {
-            // 再有効化時に購読が外れていれば再購読
-            if (!_isSubscribed && _playerInput != null)
+            if (!_isSubscribed)
             {
                 SubscribeActions();
             }
         }
 
         /// <summary>
-        /// 対象のアクションマップ内の全アクションを購読する
+        /// インスペクタで設定されたマッピングリストに基づきアクションを購読する
         /// </summary>
         private void SubscribeActions()
         {
-            if (_playerInput == null || _playerInput.actions == null)
+            if (actionKeyMappings == null || actionKeyMappings.Count == 0)
             {
-                Debug.LogWarning("[PlayerInteractor2D] PlayerInput または Actions アセットが未設定です。", this);
+                Debug.LogWarning("[PlayerInteractor2D] ActionKeyMappings が設定されていません。インスペクタでアクションと論理キーの組み合わせを追加してください。", this);
                 return;
             }
 
-            IEnumerable<InputAction> actionsToSubscribe;
-
-            if (string.IsNullOrEmpty(targetActionMapName))
+            foreach (var mapping in actionKeyMappings)
             {
-                // 全マップ対象: InputActionAsset から全アクションマップの全アクションを取得
-                actionsToSubscribe = _playerInput.actions.actionMaps.SelectMany(map => map.actions);
-            }
-            else
-            {
-                // 指定マップのみ対象
-                var map = _playerInput.actions.FindActionMap(targetActionMapName);
-                if (map != null)
+                if (mapping.actionReference == null)
                 {
-                    actionsToSubscribe = map.actions;
+                    Debug.LogWarning("[PlayerInteractor2D] ActionReference が未設定のエントリがあります。", this);
+                    continue;
                 }
-                else
+
+                var action = mapping.actionReference.action;
+                if (action == null)
                 {
-                    Debug.LogWarning($"[PlayerInteractor2D] アクションマップ '{targetActionMapName}' が見つかりません。", this);
-                    return;
+                    Debug.LogWarning("[PlayerInteractor2D] ActionReference がアクションを指していません。", this);
+                    continue;
                 }
-            }
 
-            foreach (var action in actionsToSubscribe)
-            {
-                // すでに購読済みならスキップ
-                if (_actionToLogicalKey.ContainsKey(action)) continue;
+                if (string.IsNullOrEmpty(mapping.logicalKey))
+                {
+                    Debug.LogWarning("[PlayerInteractor2D] LogicalKey が空のエントリがあります。", this);
+                    continue;
+                }
 
-                _actionToLogicalKey[action] = action.name; // アクション名をそのまま論理キーとして使用
+                // 重複チェック（同じアクションを二重登録しない）
+                if (_actionToLogicalKey.ContainsKey(action))
+                {
+                    Debug.LogWarning($"[PlayerInteractor2D] アクション '{action.name}' は既に登録されています。スキップします。", this);
+                    continue;
+                }
+
+                _actionToLogicalKey[action] = mapping.logicalKey;
                 action.performed += OnActionPerformed;
                 action.Enable();
             }
@@ -196,7 +193,7 @@ namespace InteractionSystem2D
         {
             if (_currentTarget == null) return;
 
-            // 実行されたアクション名を論理キーとして取得
+            // 実行されたアクションに対応する論理キーを取得
             if (_actionToLogicalKey.TryGetValue(context.action, out string logicalKey))
             {
                 // 対象がそのキーを処理できるか試行
