@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -107,8 +108,8 @@ namespace InteractionSystem2D
 
             if (string.IsNullOrEmpty(targetActionMapName))
             {
-                // 全マップ対象
-                actionsToSubscribe = _playerInput.actions.actions;
+                // 全マップ対象: InputActionAsset から全アクションマップの全アクションを取得
+                actionsToSubscribe = _playerInput.actions.actionMaps.SelectMany(map => map.actions);
             }
             else
             {
