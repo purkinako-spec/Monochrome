@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -54,9 +54,10 @@ namespace InteractionSystem2D
             // 検知用コライダーがメインのコライダーと同一の場合、警告（すり抜けの原因になるため）
             else if (_activeDetectionCollider == GetComponent<Collider2D>())
             {
-                Debug.LogWarning("[PlayerInteractor2D] 検知用コライダーがメインの物理コライダーと同一です。" +
+                /*Debug.LogWarning("[PlayerInteractor2D] 検知用コライダーがメインの物理コライダーと同一です。" +
                                  "物理衝突（壁あたり判定）が無効化され、すり抜けの原因になります。" +
                                  "子オブジェクトに別途 CircleCollider2D (IsTrigger=ON) を作成し、Detection Collider にアサインすることを強く推奨します。", this);
+                */
             }
 
             // Input Systemのアクションを取得
