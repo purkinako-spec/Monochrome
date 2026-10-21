@@ -4,7 +4,9 @@ namespace InteractionSystem2D
 {
     /// <summary>
     /// IInteractable2D のシンプルなサンプル実装（看板、NPC、宝箱等を想定）。
-    /// アタッチ時に自動でレイヤーを "Interactable" に、コライダーを Trigger に設定する。
+    /// アタッチ時に自動でレイヤーを "Interactable" に設定する。
+    /// ※ コライダーの IsTrigger は自動で変更しません（物理衝突が必要なため）。
+    /// 検知のみ行いたい場合はインスペクタで手動で IsTrigger を ON にしてください。
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class InteractableObject2DExample : MonoBehaviour, IInteractable2D
@@ -26,11 +28,8 @@ namespace InteractionSystem2D
         {
             _collider = GetComponent<Collider2D>();
 
-            // 1. コライダーを Trigger に設定
-            if (_collider != null)
-            {
-                _collider.isTrigger = true;
-            }
+            // 1. コライダーを Trigger に設定 しない（物理衝突させるため）
+            // 必要ならインスペクタで手動でチェックを入れてください。
 
             // 2. レイヤーを "Interactable" に設定（存在しない場合は警告）
             int interactableLayer = LayerMask.NameToLayer("Interactable");
@@ -41,17 +40,13 @@ namespace InteractionSystem2D
             else
             {
                 Debug.LogWarning($"[InteractableObject2DExample] 'Interactable' レイヤーがプロジェクトに存在しません。\n" +
-                                 $"Edit > Project Settings > Tags and Layers で Layer 31 などに 'Interactable' を追加してください。", this);
+                                 $"Edit > Project Settings > Tags and Layers で Layer 6 などに 'Interactable' を追加してください。", this);
             }
         }
 
         private void OnValidate()
         {
-            // インスペクタ値変更時も Trigger 維持
-            if (_collider != null && !_collider.isTrigger)
-            {
-                _collider.isTrigger = true;
-            }
+            // インスペクタ値変更時の自動制御は行わない（物理設定は手動管理推奨）
         }
 
         // --- IInteractable2D 実装 ---

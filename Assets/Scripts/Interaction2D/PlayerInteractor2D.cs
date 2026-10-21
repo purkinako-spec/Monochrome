@@ -6,17 +6,18 @@ namespace InteractionSystem2D
 {
     /// <summary>
     /// プレイヤー側のインタラクト検知・実行コンポーネント。
-    /// - CircleCollider2D(IsTrigger) または Physics2D.OverlapCircle で範囲検知
-    /// - LayerMask でインタラクト専用レイヤーのみを判定
-    /// - 範囲内に複数ある場合は「最も近いオブジェクト」を優先
-    /// - 新Input Systemのイベント駆動（performed）で入力を受け取る
+    /// - 検知用コライダー（IsTrigger=true）を別途アサインして使用する設計に変更
+    /// - メインの物理コライダー（IsTrigger=false）は触らないため、壁やNPCとすり抜けなくなる
     /// </summary>
-    [RequireComponent(typeof(Collider2D))]
+    [RequireComponent(typeof(Collider2D))] // メインの物理コライダー（身体）が必須
     public class PlayerInteractor2D : MonoBehaviour
     {
         [Header("検知設定")]
         [Tooltip("インタラクト判定対象のレイヤー（専用レイヤーを推奨）")]
         [SerializeField] private LayerMask interactableLayerMask;
+
+        [Tooltip("検知用コライダー（IsTrigger=true の別コライダー、または子オブジェクトのコライダーを指定）。未指定の場合はこのオブジェクトのコライダーを使用しますが、物理判定と干渉しないよう別コライダー推奨。")]
+        [SerializeField] private Collider2D detectionCollider;
 
         [Tooltip("OverlapCircleを使用する場合の半径（Colliderを使わない場合）")]
         [SerializeField] private float detectionRadius = 1.5f;
@@ -31,21 +32,34 @@ namespace InteractionSystem2D
         private readonly List<IInteractable2D> _candidates = new List<IInteractable2D>();
         // 現在選択中（最も近い）のインタラクト対象
         private IInteractable2D _currentTarget;
-        // 自身のコライダー（Trigger用）
-        private Collider2D _selfCollider;
+        // 検知用コライダー（Trigger用）
+        private Collider2D _activeDetectionCollider;
         // Input Action参照
         private InputAction _interactAction;
 
         private void Awake()
         {
-            _selfCollider = GetComponent<Collider2D>();
-            // コライダーをTriggerに強制設定（検知用途のため）
-            if (useTriggerCollider && _selfCollider != null)
+            // 検知用コライダーの決定
+            _activeDetectionCollider = detectionCollider != null ? detectionCollider : GetComponent<Collider2D>();
+
+            // 検知用コライダーが設定されている場合、強制的にTriggerにする
+            if (useTriggerCollider && _activeDetectionCollider != null)
             {
-                _selfCollider.isTrigger = true;
+                if (!_activeDetectionCollider.isTrigger)
+                {
+                    Debug.LogWarning($"[PlayerInteractor2D] 検知用コライダー '{_activeDetectionCollider.name}' が Trigger ではありません。強制的に Trigger に設定します。", _activeDetectionCollider);
+                    _activeDetectionCollider.isTrigger = true;
+                }
+            }
+            // 検知用コライダーがメインのコライダーと同一の場合、警告（すり抜けの原因になるため）
+            else if (_activeDetectionCollider == GetComponent<Collider2D>())
+            {
+                Debug.LogWarning("[PlayerInteractor2D] 検知用コライダーがメインの物理コライダーと同一です。" +
+                                 "物理衝突（壁あたり判定）が無効化され、すり抜けの原因になります。" +
+                                 "子オブジェクトに別途 CircleCollider2D (IsTrigger=ON) を作成し、Detection Collider にアサインすることを強く推奨します。", this);
             }
 
-            // Input Systemのアクションを取得（PlayerInputコンポーネントから、または直接アセット参照でも可）
+            // Input Systemのアクションを取得
             var playerInput = GetComponent<PlayerInput>();
             if (playerInput != null)
             {
@@ -90,7 +104,9 @@ namespace InteractionSystem2D
         /// </summary>
         private void OnTriggerEnter2D(Collider2D other)
         {
+            // このスクリプトがアタッチされているコライダー（検知用）以外からのイベントは無視
             if (!useTriggerCollider) return;
+            if (other != _activeDetectionCollider) return; // 自身の検知コライダー以外のTriggerイベントを無視
             if (!IsInInteractableLayer(other.gameObject.layer)) return;
 
             var interactable = other.GetComponent<IInteractable2D>();
@@ -107,6 +123,7 @@ namespace InteractionSystem2D
         private void OnTriggerExit2D(Collider2D other)
         {
             if (!useTriggerCollider) return;
+            if (other != _activeDetectionCollider) return;
 
             var interactable = other.GetComponent<IInteractable2D>();
             if (interactable != null && _candidates.Contains(interactable))
@@ -134,7 +151,7 @@ namespace InteractionSystem2D
         {
             IInteractable2D nearest = null;
             float minDistSqr = float.MaxValue;
-            Vector2 playerPos = transform.position;
+            Vector2 playerPos = transform.position; // プレイヤーの中心座標を基準に距離計算
 
             // OverlapCircleモードの場合、ここで物理クエリを実行して候補を更新
             if (!useTriggerCollider)
@@ -154,7 +171,6 @@ namespace InteractionSystem2D
             // 候補の中から最近傍を選択
             foreach (var candidate in _candidates)
             {
-                // IInteractable2D は Component を継承している前提で transform にアクセス
                 if (candidate is Component comp)
                 {
                     float distSqr = (comp.transform.position - (Vector3)playerPos).sqrMagnitude;
@@ -187,16 +203,15 @@ namespace InteractionSystem2D
             if (!showDebugGizmos) return;
 
             Gizmos.color = Color.cyan;
-            if (useTriggerCollider && _selfCollider != null)
+            if (useTriggerCollider && _activeDetectionCollider != null)
             {
-                // CircleCollider2D の場合のみ半径を描画
-                if (_selfCollider is CircleCollider2D circle)
+                if (_activeDetectionCollider is CircleCollider2D circle)
                 {
-                    Gizmos.DrawWireSphere(transform.position + (Vector3)circle.offset, circle.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y));
+                    Gizmos.DrawWireSphere(_activeDetectionCollider.transform.position + (Vector3)circle.offset, circle.radius * Mathf.Max(_activeDetectionCollider.transform.lossyScale.x, _activeDetectionCollider.transform.lossyScale.y));
                 }
                 else
                 {
-                    Gizmos.DrawWireCube(transform.position, _selfCollider.bounds.size);
+                    Gizmos.DrawWireCube(_activeDetectionCollider.bounds.center, _activeDetectionCollider.bounds.size);
                 }
             }
             else
@@ -204,7 +219,6 @@ namespace InteractionSystem2D
                 Gizmos.DrawWireSphere(transform.position, detectionRadius);
             }
 
-            // 現在のターゲットへ線を引く
             if (_currentTarget is Component targetComp)
             {
                 Gizmos.color = Color.green;
