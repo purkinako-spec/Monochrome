@@ -6,11 +6,13 @@ namespace InteractionSystem2D
 {
     /// <summary>
     /// プレイヤー側のインタラクト検知・実行コンポーネント。
-    /// - Input System の複数アクションを監視し、論理キーに変換して対象に渡す
-    /// - 対象オブジェクトが要求する論理キーと一致した場合のみインタラクト実行
+    /// - PlayerInput の標準的な仕組み（C# イベント）を使用
+    /// - アクション名をそのまま「論理キー」として扱う（規約ベース：Action名 == LogicalKey）
+    /// - 別途マッピングリストをインスペクタで設定する必要なし
     /// - 検知用コライダー（IsTrigger=true）を別途アサインして使用
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
+    [RequireComponent(typeof(PlayerInput))]
     public class PlayerInteractor2D : MonoBehaviour
     {
         [Header("検知設定")]
@@ -26,13 +28,9 @@ namespace InteractionSystem2D
         [Tooltip("true: Trigger検知 / false: OverlapCircle検知")]
         [SerializeField] private bool useTriggerCollider = true;
 
-        [Header("入力・キー設定")]
-        [Tooltip("InputAction名 -> 論理キー名 のマッピング。\n例: Action「Interact」-> Key「Interact」、Action「Talk」-> Key「Talk」")]
-        [SerializeField] private List<ActionKeyMapping> actionKeyMappings = new List<ActionKeyMapping>
-        {
-            new ActionKeyMapping { actionName = "Interact", logicalKey = "Interact" },
-            new ActionKeyMapping { actionName = "Talk", logicalKey = "Talk" }
-        };
+        [Header("入力設定")]
+        [Tooltip("監視するアクションマップ名（空の場合は全マップの全アクションを監視）")]
+        [SerializeField] private string targetActionMapName = "Player";
 
         [Header("デバッグ")]
         [SerializeField] private bool showDebugGizmos = true;
@@ -42,15 +40,7 @@ namespace InteractionSystem2D
         private IInteractable2D _currentTarget;
         private Collider2D _activeDetectionCollider;
         private PlayerInput _playerInput;
-        private readonly Dictionary<string, InputAction> _actionMap = new Dictionary<string, InputAction>();
         private readonly Dictionary<InputAction, string> _actionToLogicalKey = new Dictionary<InputAction, string>();
-
-        [System.Serializable]
-        public class ActionKeyMapping
-        {
-            public string actionName;   // Input Actions アセットで定義したアクション名
-            public string logicalKey;   // IInteractable2D.RequiredKey と一致させる論理キー
-        }
 
         private void Awake()
         {
@@ -76,30 +66,79 @@ namespace InteractionSystem2D
                 return;
             }
 
-            // アクションの取得とマッピング構築
-            foreach (var mapping in actionKeyMappings)
-            {
-                var action = _playerInput.actions.FindAction(mapping.actionName);
-                if (action != null)
-                {
-                    _actionMap[mapping.actionName] = action;
-                    _actionToLogicalKey[action] = mapping.logicalKey;
-                    action.performed += OnActionPerformed;
-                    action.Enable();
-                }
-                else
-                {
-                    Debug.LogWarning($"[PlayerInteractor2D] アクション '{mapping.actionName}' が Input Actions に見つかりません。", this);
-                }
-            }
+            // アクションの自動購読（アクション名 = 論理キー名として扱う）
+            SubscribeActions();
         }
 
         private void OnDestroy()
         {
+            UnsubscribeActions();
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeActions();
+        }
+
+        private void OnEnable()
+        {
+            // シーン遷移等で PlayerInput が再初期化される場合に備えて再購読
+            if (_playerInput != null && _actionToLogicalKey.Count == 0)
+            {
+                SubscribeActions();
+            }
+        }
+
+        /// <summary>
+        /// 対象のアクションマップ内の全アクションを購読する
+        /// </summary>
+        private void SubscribeActions()
+        {
+            if (_playerInput.actions == null) return;
+
+            IEnumerable<InputAction> actionsToSubscribe;
+
+            if (string.IsNullOrEmpty(targetActionMapName))
+            {
+                // 全マップ対象
+                actionsToSubscribe = _playerInput.actions.actions;
+            }
+            else
+            {
+                // 指定マップのみ対象
+                var map = _playerInput.actions.FindActionMap(targetActionMapName);
+                if (map != null)
+                {
+                    actionsToSubscribe = map.actions;
+                }
+                else
+                {
+                    Debug.LogWarning($"[PlayerInteractor2D] アクションマップ '{targetActionMapName}' が見つかりません。", this);
+                    return;
+                }
+            }
+
+            foreach (var action in actionsToSubscribe)
+            {
+                // すでに購読済みならスキップ
+                if (_actionToLogicalKey.ContainsKey(action)) continue;
+
+                _actionToLogicalKey[action] = action.name; // アクション名をそのまま論理キーとして使用
+                action.performed += OnActionPerformed;
+                action.Enable();
+            }
+        }
+
+        private void UnsubscribeActions()
+        {
             foreach (var kvp in _actionToLogicalKey)
             {
-                kvp.Key.performed -= OnActionPerformed;
+                if (kvp.Key != null)
+                {
+                    kvp.Key.performed -= OnActionPerformed;
+                }
             }
+            _actionToLogicalKey.Clear();
         }
 
         private void FixedUpdate()
@@ -144,7 +183,7 @@ namespace InteractionSystem2D
         {
             if (_currentTarget == null) return;
 
-            // 実行されたアクションに対応する論理キーを取得
+            // 実行されたアクション名を論理キーとして取得
             if (_actionToLogicalKey.TryGetValue(context.action, out string logicalKey))
             {
                 // 対象がそのキーを処理できるか試行
