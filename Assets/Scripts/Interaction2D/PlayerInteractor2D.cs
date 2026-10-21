@@ -41,6 +41,7 @@ namespace InteractionSystem2D
         private Collider2D _activeDetectionCollider;
         private PlayerInput _playerInput;
         private readonly Dictionary<InputAction, string> _actionToLogicalKey = new Dictionary<InputAction, string>();
+        private bool _isSubscribed = false;
 
         private void Awake()
         {
@@ -60,13 +61,15 @@ namespace InteractionSystem2D
             }
 
             _playerInput = GetComponent<PlayerInput>();
-            if (_playerInput == null || _playerInput.actions == null)
+            if (_playerInput == null)
             {
-                Debug.LogError("[PlayerInteractor2D] PlayerInput コンポーネントまたは Actions アセットが見つかりません。", this);
-                return;
+                Debug.LogError("[PlayerInteractor2D] PlayerInput コンポーネントが見つかりません。", this);
             }
+        }
 
-            // アクションの自動購読（アクション名 = 論理キー名として扱う）
+        private void Start()
+        {
+            // PlayerInput の Actions 初期化完了を待って購読
             SubscribeActions();
         }
 
@@ -82,8 +85,8 @@ namespace InteractionSystem2D
 
         private void OnEnable()
         {
-            // シーン遷移等で PlayerInput が再初期化される場合に備えて再購読
-            if (_playerInput != null && _actionToLogicalKey.Count == 0)
+            // 再有効化時に購読が外れていれば再購読
+            if (!_isSubscribed && _playerInput != null)
             {
                 SubscribeActions();
             }
@@ -94,7 +97,11 @@ namespace InteractionSystem2D
         /// </summary>
         private void SubscribeActions()
         {
-            if (_playerInput.actions == null) return;
+            if (_playerInput == null || _playerInput.actions == null)
+            {
+                Debug.LogWarning("[PlayerInteractor2D] PlayerInput または Actions アセットが未設定です。", this);
+                return;
+            }
 
             IEnumerable<InputAction> actionsToSubscribe;
 
@@ -127,6 +134,8 @@ namespace InteractionSystem2D
                 action.performed += OnActionPerformed;
                 action.Enable();
             }
+
+            _isSubscribed = true;
         }
 
         private void UnsubscribeActions()
@@ -139,6 +148,7 @@ namespace InteractionSystem2D
                 }
             }
             _actionToLogicalKey.Clear();
+            _isSubscribed = false;
         }
 
         private void FixedUpdate()
