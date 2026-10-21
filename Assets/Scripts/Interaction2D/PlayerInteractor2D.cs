@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -35,6 +35,8 @@ namespace InteractionSystem2D
 
         [Header("デバッグ")]
         [SerializeField] private bool showDebugGizmos = true;
+
+        public InputActionReference action;
 
         // 内部状態
         private readonly List<IInteractable2D> _candidates = new List<IInteractable2D>();
