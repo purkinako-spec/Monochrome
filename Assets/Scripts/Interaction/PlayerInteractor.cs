@@ -104,12 +104,20 @@ namespace InteractionSystem
             {
                 // ヒットしたオブジェクト (または親) から IInteractable を取得
                 // TryGetComponent は失敗しても GC Alloc が発生しない
-                if (_raycastHit.transform.TryGetComponent(out IInteractable interactable)
-                    || _raycastHit.transform.GetComponentInParent<IInteractable>() is IInteractable parentInteractable) // 親検索は TryGetComponent できないためパターンマッチングで null チェック
+                IInteractable found = null;
+                
+                if (_raycastHit.transform.TryGetComponent(out IInteractable interactable))
                 {
-                    // 親から見つかった場合はそれを優先
-                    IInteractable found = interactable ?? parentInteractable;
+                    found = interactable;
+                }
+                else
+                {
+                    // 親階層を検索 (TryGetComponent 非対応のため通常呼び出し)
+                    found = _raycastHit.transform.GetComponentInParent<IInteractable>();
+                }
 
+                if (found != null)
+                {
                     // 対象が変わった時のみ更新 (無駄な代入・UI更新を防ぐ)
                     if (_currentInteractable != found)
                     {

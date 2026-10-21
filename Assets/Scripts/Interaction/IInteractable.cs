@@ -1,5 +1,7 @@
 namespace InteractionSystem
 {
+    using UnityEngine;
+
     /// <summary>
     /// インタラクト可能なオブジェクトが実装するインターフェース
     /// </summary>
