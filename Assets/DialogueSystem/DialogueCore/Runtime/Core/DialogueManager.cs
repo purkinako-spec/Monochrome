@@ -92,6 +92,7 @@ namespace Runtime.Dialogue.Logic
         /// </summary>
         public void StartDialogue(DialogueContainer container, Action onEnded = null)
         {
+            
             if (container != null)
             {
                 currentContainer = container;
@@ -105,6 +106,7 @@ namespace Runtime.Dialogue.Logic
         /// </summary>
         public void StartDialogue(string startNodeID = "")
         {
+            
             if (currentContainer == null)
             {
                 Debug.LogError("DialogueContainer が設定されていません！");

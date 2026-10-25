@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace MiniGame.Fish.Test2
@@ -9,18 +9,6 @@ namespace MiniGame.Fish.Test2
     /// </summary>
     public class SceneLoader : MonoBehaviour
     {
-        public static SceneLoader Instance { get; private set; }
-
-        private void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
 
         /// <summary>
         /// 指定したシーンを Additive で読み込む

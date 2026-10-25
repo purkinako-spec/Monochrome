@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc6dcf3673927a488b8d4f7d6fd5ffb, type: 3}
+  m_Name: FishingMiniGameDialogueContainer
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueContainer
+  startNodeID: Node_d46da
+  allNodes:
+  - graphPosition: {x: 100, y: 100}
+    nextNodeID: 
+    nodeID: Node_d46da
+    speakerName: "\u91E3\u308A\u4EBA"
+    dialogueText: "[dialogue_fade:type=in,time=0.5]\u91E3\u308A\u3059\u308B\uFF1F"
+    choices:
+    - choiceText: "\u3059\u308B!!"
+      targetNodeID: Node_1f273
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: "\u3057\u306A\u3044"
+      targetNodeID: Node_b13a3
+      branchType: DefaultChoiceHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+  - graphPosition: {x: 708, y: 100}
+    nextNodeID: Node_7c912
+    nodeID: Node_1f273
+    speakerName: "\u91E3\u308A\u4EBA"
+    dialogueText: "\u3088\u3057\u59CB\u3081\u3088\u3046!!"
+    choices: []
+  - graphPosition: {x: 708, y: 285}
+    nextNodeID: Node_cd479
+    nodeID: Node_b13a3
+    speakerName: "\u91E3\u308A\u4EBA"
+    dialogueText: "\u305D\u3063\u304B\u3058\u3083\u3042\u306D"
+    choices: []
+  - graphPosition: {x: 975, y: 285}
+    nextNodeID: 
+    nodeID: Node_cd479
+    speakerName: "\u91E3\u308A\u4EBA"
+    dialogueText: '[end_dialogue:fade=0.5]'
+    choices: []
+  - graphPosition: {x: 975, y: 100}
+    nextNodeID: 
+    nodeID: Node_7c912
+    speakerName: 
+    dialogueText: '[call:mode=self, script=SceneLoader, method=LoadScene, arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]'
+    choices: []

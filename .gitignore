@@ -80,3 +80,5 @@ sysinfo.txt
 *.opendb
 *.VC.db
 .aider*
+
+AiderLogs/

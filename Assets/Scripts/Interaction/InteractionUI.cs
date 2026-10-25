@@ -1,7 +1,9 @@
+﻿using InteractionSystem;
+
 namespace InteractionSystem
 {
-    using UnityEngine;
     using TMPro;
+    using UnityEngine;
 
     /// <summary>
     /// PlayerInteractor のイベントを購読し、インタラクトプロンプトを表示する UI コントローラー

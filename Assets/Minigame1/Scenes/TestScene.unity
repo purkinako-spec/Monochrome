@@ -177,7 +177,6 @@ GameObject:
   - component: {fileID: 611836175}
   - component: {fileID: 611836174}
   - component: {fileID: 611836173}
-  - component: {fileID: 611836177}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -303,30 +302,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &611836177
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 611836172}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c88f5cead0c0b2a4eb05b5900433f8d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.PixelPerfectCamera
-  m_ComponentVersion: 1
-  m_AssetsPPU: 20
-  m_RefResolutionX: 320
-  m_RefResolutionY: 180
-  m_CropFrame: 0
-  m_GridSnapping: 0
-  m_FilterMode: 0
-  m_UpscaleRT: 0
-  m_PixelSnapping: 0
-  m_CropFrameX: 0
-  m_CropFrameY: 0
-  m_StretchFill: 0
 --- !u!1 &1157618348
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,9 +452,8 @@ GameObject:
   - component: {fileID: 1225189208}
   - component: {fileID: 1225189207}
   - component: {fileID: 1225189206}
-  - component: {fileID: 1225189212}
   - component: {fileID: 1225189213}
-  - component: {fileID: 1225189214}
+  - component: {fileID: 1225189215}
   m_Layer: 0
   m_Name: image_0
   m_TagString: Untagged
@@ -647,42 +621,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &1225189212
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1225189204}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 0.64
 --- !u!114 &1225189213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -713,7 +651,7 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 611836175}
---- !u!114 &1225189214
+--- !u!114 &1225189215
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -722,16 +660,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 1225189204}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2058f32dd7041b47a7d4a6cdd610e54, type: 3}
+  m_Script: {fileID: 11500000, guid: f4719d91dc207ff459b87c370274255c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Interaction.PlayerInteractor
-  _detectionRadius: 1.5
-  _interactableLayer:
+  m_EditorClassIdentifier: Assembly-CSharp::InteractionSystem2D.PlayerInteractor2D
+  interactableLayerMask:
     serializedVersion: 2
-    m_Bits: 0
-  _detectionCenter: {fileID: 0}
-  _interactAction: {fileID: -1402116038489618208, guid: 0ca84dc6bb1f538499fc5c997a41190d, type: 3}
-  _showGizmos: 1
+    m_Bits: 64
+  detectionCollider: {fileID: 0}
+  detectionRadius: 0.5
+  useTriggerCollider: 0
+  actionKeyMappings:
+  - actionReference: {fileID: -1402116038489618208, guid: 0ca84dc6bb1f538499fc5c997a41190d, type: 3}
+    logicalKey: Intearct
+  showDebugGizmos: 1
 --- !u!1 &1241275959
 GameObject:
   m_ObjectHideFlags: 0
@@ -811,6 +752,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1373345469 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6113977625182445273, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+  m_PrefabInstance: {fileID: 2088368408}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0704285dccd60db48bdc35f328cd3a73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.DialogueViewWindow
 --- !u!1 &1460104307
 GameObject:
   m_ObjectHideFlags: 0
@@ -913,8 +865,10 @@ GameObject:
   - component: {fileID: 1656286997}
   - component: {fileID: 1656286996}
   - component: {fileID: 1656286995}
-  - component: {fileID: 1656286998}
   - component: {fileID: 1656286999}
+  - component: {fileID: 1656287001}
+  - component: {fileID: 1656287002}
+  - component: {fileID: 1656287003}
   m_Layer: 6
   m_Name: image_1
   m_TagString: Untagged
@@ -1042,7 +996,73 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1656286998
+--- !u!58 &1656286999
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656286993}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.24
+--- !u!114 &1656287001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656286993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d607ca9170f60174f98a98bf995a4566, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueStarter
+  dialogueData: {fileID: 11400000, guid: a1e7e3e067cd4e0459d2356ba3751671, type: 2}
+  dialogueView: {fileID: 1373345469}
+--- !u!114 &1656287002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656286993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00d1954df7c679048910692fc6eb2cfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InteractionSystem2D.InteractableObject2DNPC
+  requiredKey: Intearct
+  interactPrompt: "[F] \u8ABF\u3079\u308B"
+  isInteractable: 1
+  _collider: {fileID: 1656286995}
+--- !u!114 &1656287003
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1053,27 +1073,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49fd26df26f5cbd4c9490d04acab6d4c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
-  sceneName: FishingMinigameSceneTest2
---- !u!114 &1656286999
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1656286993}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0dd01ddad2187648835cd773faaa588, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Interaction.InteractableReceiver
-  _processor:
-    rid: -2
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+  m_EditorClassIdentifier: Assembly-CSharp::MiniGame.Fish.Test2.SceneLoader
 --- !u!1 &1742309763
 GameObject:
   m_ObjectHideFlags: 0
@@ -1594,6 +1594,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7400586163441464890, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: currentContainer
+      value: 
+      objectReference: {fileID: 11400000, guid: a1e7e3e067cd4e0459d2356ba3751671, type: 2}
     - target: {fileID: 7807668273551901627, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_Name
       value: Dialogue
