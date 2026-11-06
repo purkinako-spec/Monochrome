@@ -54,5 +54,5 @@ MonoBehaviour:
     nextNodeID: 
     nodeID: Node_7c912
     speakerName: 
-    dialogueText: '[call:mode=self, script=SceneLoader, method=LoadScene, arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]'
+    dialogueText: '[call:mode=nearest,script=SceneLoader,method=LoadScene,arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]'
     choices: []

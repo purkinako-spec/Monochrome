@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using Runtime.Dialogue.Plugins.Portraits;
+using Runtime.Dialogue.Core;
 
 namespace Runtime.Dialogue.Editor
 {
@@ -32,7 +33,7 @@ namespace Runtime.Dialogue.Editor
         public static void ShowWindow()
         {
             var window = GetWindow<PortraitCommandBuilderWindow>("Portrait Builder");
-            window.minSize = new Vector2(380, 420);
+            window.minSize = new Vector2(380, 440);
         }
 
         private void OnEnable()
@@ -46,7 +47,7 @@ namespace Runtime.Dialogue.Editor
             GUILayout.Label("🎭 立ち絵コマンド生成ツール", EditorStyles.boldLabel);
             GUILayout.Space(5);
 
-            // 💡 追加: 3つのモードを切り替えるタブボタン
+            // 3つのモードを切り替えるタブボタン
             string[] toolbarStrings = { "🎨 通常表示", "🧹 全消去(All)", "🧹 個別消去(Single)" };
             currentMode = (BuilderMode)GUILayout.Toolbar((int)currentMode, toolbarStrings, GUILayout.Height(30));
             GUILayout.Space(10);
@@ -61,8 +62,7 @@ namespace Runtime.Dialogue.Editor
             {
                 // 全消去モード
                 GUILayout.Label("画面上のすべての立ち絵を非表示にします。", EditorStyles.wordWrappedLabel);
-                
-                // ClearAllでもフェード時間は指定できるようにする
+
                 GUILayout.Space(5);
                 EditorGUILayout.LabelField("トランジション設定", EditorStyles.boldLabel);
                 fadeTime = EditorGUILayout.FloatField("フェード時間 (秒)", fadeTime);
@@ -78,6 +78,7 @@ namespace Runtime.Dialogue.Editor
                     var posList = handler.portraitSlots.Select(s => s.positionID).ToList();
                     if (posList.Count > 0)
                     {
+                        if (selectedPosIndex >= posList.Count) selectedPosIndex = 0;
                         selectedPosIndex = EditorGUILayout.Popup("消去する位置 (pos)", selectedPosIndex, posList.ToArray());
                         finalPos = posList[selectedPosIndex];
                     }
@@ -110,19 +111,46 @@ namespace Runtime.Dialogue.Editor
 
                 if (!isManualMode && handler != null)
                 {
-                    var charaList = handler.profiles.Select(p => p.characterID).ToList();
-                    if (charaList.Count > 0)
+                    // データベース登録キャラ＋個別登録キャラの両方を全取得
+                    var allProfiles = handler.GetAllProfiles();
+
+                    if (allProfiles.Count > 0)
                     {
+                        var charaList = allProfiles.Select(p => p.characterID).ToList();
+                        if (selectedCharIndex >= charaList.Count) selectedCharIndex = 0;
+
                         selectedCharIndex = EditorGUILayout.Popup("キャラクター (target)", selectedCharIndex, charaList.ToArray());
                         finalTarget = charaList[selectedCharIndex];
-                    }
-                    else GUILayout.Label("※キャラクターが登録されていません");
 
-                    finalExp = EditorGUILayout.TextField("表情 (exp)", finalExp);
+                        // 選択キャラの表情リストをPopup表示
+                        var selectedProfile = allProfiles[selectedCharIndex];
+                        var expList = selectedProfile.expressions?
+                            .Select(e => e.expressionID)
+                            .Where(id => !string.IsNullOrEmpty(id))
+                            .ToList() ?? new List<string>();
+
+                        if (expList.Count > 0)
+                        {
+                            int expIndex = expList.IndexOf(manualExpression);
+                            if (expIndex < 0) expIndex = 0;
+                            int newExpIndex = EditorGUILayout.Popup("表情 (exp)", expIndex, expList.ToArray());
+                            finalExp = expList[newExpIndex];
+                        }
+                        else
+                        {
+                            finalExp = EditorGUILayout.TextField("表情 (exp)", manualExpression);
+                        }
+                    }
+                    else
+                    {
+                        GUILayout.Label("※キャラクターが登録されていません（DatabaseまたはProfilesを確認してください）");
+                        finalExp = EditorGUILayout.TextField("表情 (exp)", manualExpression);
+                    }
 
                     var posList = handler.portraitSlots.Select(s => s.positionID).ToList();
                     if (posList.Count > 0)
                     {
+                        if (selectedPosIndex >= posList.Count) selectedPosIndex = 0;
                         selectedPosIndex = EditorGUILayout.Popup("表示位置 (pos)", selectedPosIndex, posList.ToArray());
                         finalPos = posList[selectedPosIndex];
                     }

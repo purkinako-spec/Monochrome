@@ -203,7 +203,7 @@ RectTransform:
   m_GameObject: {fileID: 3277717000904591459}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.04, y: 0.04, z: 0.1}
+  m_LocalScale: {x: 0.0219688, y: 0.0219688, z: 0.054922003}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4613763781128921488}
@@ -454,6 +454,9 @@ MonoBehaviour:
   catchDistance: 0.5
   baseRequiredTime: 2
   gaugeDecayRate: 0.5
+  catchJumpHeight: 1.2
+  catchAnimDuration: 0.6
+  catchEffectPrefab: {fileID: 0}
   onLureEnterEvent:
     m_PersistentCalls:
       m_Calls: []

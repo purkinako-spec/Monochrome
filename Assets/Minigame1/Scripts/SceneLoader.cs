@@ -1,45 +1,44 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace MiniGame.Fish.Test2
+/// <summary>
+/// シーン遷移を管理するシングルトンローダー
+/// FishingSpotProcessor 等から参照されることを想定
+/// </summary>
+public class SceneLoader : MonoBehaviour
 {
+
     /// <summary>
-    /// シーン遷移を管理するシングルトンローダー
-    /// FishingSpotProcessor 等から参照されることを想定
+    /// 指定したシーンを Additive で読み込む
     /// </summary>
-    public class SceneLoader : MonoBehaviour
+
+    [SerializeField] private string sceneName;
+    public void LoadScene(string sceneName)
     {
-
-        /// <summary>
-        /// 指定したシーンを Additive で読み込む
-        /// </summary>
-        public void LoadScene(string sceneName)
+        if (string.IsNullOrEmpty(sceneName))
         {
-            if (string.IsNullOrEmpty(sceneName))
-            {
-                Debug.LogError("[SceneLoader] シーン名が指定されていません。");
-                return;
-            }
-
-            // 既に読み込まれているかチェック
-            var scene = SceneManager.GetSceneByName(sceneName);
-            if (scene.isLoaded)
-            {
-                Debug.Log($"[SceneLoader] シーン '{sceneName}' は既に読み込まれています。");
-                return;
-            }
-
-            Debug.Log($"[SceneLoader] シーン読み込み開始: {sceneName} (Additive)");
-            SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+            Debug.LogError("[SceneLoader] シーン名が指定されていません。");
+            return;
         }
 
-        /// <summary>
-        /// 指定したシーンをアンロードする
-        /// </summary>
-        public void UnloadScene(string sceneName)
+        // 既に読み込まれているかチェック
+        var scene = SceneManager.GetSceneByName(sceneName);
+        if (scene.isLoaded)
         {
-            if (string.IsNullOrEmpty(sceneName)) return;
-            SceneManager.UnloadSceneAsync(sceneName);
+            Debug.Log($"[SceneLoader] シーン '{sceneName}' は既に読み込まれています。");
+            return;
         }
+
+        Debug.Log($"[SceneLoader] シーン読み込み開始: {sceneName} (Additive)");
+        SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+    }
+
+    /// <summary>
+    /// 指定したシーンをアンロードする
+    /// </summary>
+    public void UnloadScene(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName)) return;
+        SceneManager.UnloadSceneAsync(sceneName);
     }
 }

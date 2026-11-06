@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +28,12 @@ namespace Runtime.Dialogue.Plugins.Portraits
     {
         public int Priority => 0;
 
-        [Header("Character Profiles")]
+        [Header("Portrait Databases")]
+        [Tooltip("使用するポートレートデータベースのリスト（先頭の要素ほど優先的に検索されます）")]
+        [SerializeField] private List<DialoguePortraitDatabase> portraitDatabases = new List<DialoguePortraitDatabase>();
+
+        [Header("Character Profiles (個別登録用・フォールバック)")]
+        [Tooltip("個別に登録されたプロファイル（データベース未登録時のフォールバックとしても機能します）")]
         public List<CharacterProfile> profiles = new List<CharacterProfile>();
 
         [Header("UI Slots")]
@@ -59,6 +64,89 @@ namespace Runtime.Dialogue.Plugins.Portraits
             }
         }
 
+        // --- データベースの動的追加・削除機能（DialogueAudioManager と同等の仕様） ---
+
+        /// <summary>
+        /// ポートレートデータベースを追加します（highPriority=true で先頭に挿入して優先度を高める）
+        /// </summary>
+        public void AddDatabase(DialoguePortraitDatabase db, bool highPriority = false)
+        {
+            if (db == null || portraitDatabases.Contains(db)) return;
+
+            if (highPriority)
+            {
+                portraitDatabases.Insert(0, db);
+            }
+            else
+            {
+                portraitDatabases.Add(db);
+            }
+        }
+
+        /// <summary>
+        /// ポートレートデータベースを削除します
+        /// </summary>
+        public void RemoveDatabase(DialoguePortraitDatabase db)
+        {
+            if (db != null && portraitDatabases.Contains(db))
+            {
+                portraitDatabases.Remove(db);
+            }
+        }
+
+        /// <summary>
+        /// 登録されているすべてのデータベースをクリアします
+        /// </summary>
+        public void ClearDatabases()
+        {
+            portraitDatabases.Clear();
+        }
+
+        /// <summary>
+        /// キャラクターIDからプロファイルを検索します。
+        /// 1. 登録されているデータベース（portraitDatabases）を優先検索
+        /// 2. 個別登録リスト（profiles）をフォールバック検索
+        /// </summary>
+        public CharacterProfile FindProfile(string characterID)
+        {
+            if (string.IsNullOrEmpty(characterID)) return null;
+
+            // 1. データベースリストから検索
+            foreach (var db in portraitDatabases)
+            {
+                if (db == null) continue;
+                var profile = db.GetProfile(characterID);
+                if (profile != null) return profile;
+            }
+
+            // 2. 個別登録リストからフォールバック検索
+            return profiles.Find(p => p != null && p.characterID.Equals(characterID, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// 登録されているすべてのプロファイルを重複なく取得します（エディタ連携・確認用）
+        /// </summary>
+        public List<CharacterProfile> GetAllProfiles()
+        {
+            var list = new List<CharacterProfile>();
+
+            foreach (var db in portraitDatabases)
+            {
+                if (db == null) continue;
+                foreach (var p in db.Profiles)
+                {
+                    if (p != null && !list.Contains(p)) list.Add(p);
+                }
+            }
+
+            foreach (var p in profiles)
+            {
+                if (p != null && !list.Contains(p)) list.Add(p);
+            }
+
+            return list;
+        }
+
         public bool TryHandlePortrait(string targetID, string expression, string position, Dictionary<string, string> args, Action onComplete)
         {
             // clearコマンドの処理
@@ -68,7 +156,8 @@ namespace Runtime.Dialogue.Plugins.Portraits
                 return true;
             }
 
-            var profile = profiles.Find(p => p.characterID == targetID);
+            // データベース優先でプロファイルを検索
+            var profile = FindProfile(targetID);
             if (profile == null) return false;
 
             var sprite = profile.GetExpression(expression);
@@ -86,7 +175,7 @@ namespace Runtime.Dialogue.Plugins.Portraits
             slot.portraitImage.sprite = sprite;
             slot.portraitImage.gameObject.SetActive(true);
 
-            // 💡 修正ポイント: キャラ固有の AnimatorController を動的割り当て
+            // キャラ固有の AnimatorController を動的割り当て
             if (slot.animator != null)
             {
                 if (profile.animatorController != null)
@@ -115,7 +204,6 @@ namespace Runtime.Dialogue.Plugins.Portraits
             while (timer < duration)
             {
                 timer += Time.deltaTime;
-                float progress = Mathf.Clamp01(timer / duration);
 
                 if (fadeTime > 0f)
                 {
@@ -203,7 +291,8 @@ namespace Runtime.Dialogue.Plugins.Portraits
                 return;
             }
 
-            var profile = profiles.Find(p => p.characterID == targetID);
+            // データベース優先でプロファイルを検索
+            var profile = FindProfile(targetID);
             var slot = portraitSlots.Find(s => s.positionID == position);
             if (profile != null && slot != null && slot.portraitImage != null)
             {

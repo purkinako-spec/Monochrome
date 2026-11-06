@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60eeb8ad2dbd909449e0667f8440ea3a, type: 3}
+  m_Name: TestCharacterProfile 1
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.CharacterProfile
+  characterID: n
+  displayName: ???
+  animatorController: {fileID: 0}
+  expressions:
+  - expressionID: default
+    faceSprite: {fileID: 632661706, guid: 92202b0c1ad99b543a20c06cc5a19e74, type: 3}

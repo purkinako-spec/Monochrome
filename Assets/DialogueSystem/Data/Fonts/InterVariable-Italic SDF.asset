@@ -312,6 +312,12 @@ MonoBehaviour:
       m_LigatureGlyphID: 872
     - m_ComponentGlyphIDs: 5a0300006b0a0000
       m_LigatureGlyphID: 873
+    - m_ComponentGlyphIDs: 780500004f070000
+      m_LigatureGlyphID: 1977
+    - m_ComponentGlyphIDs: 780500004e070000
+      m_LigatureGlyphID: 1915
+    - m_ComponentGlyphIDs: 7805000074050000
+      m_LigatureGlyphID: 1404
     m_GlyphPairAdjustmentRecords:
     - m_FirstAdjustmentRecord:
         m_GlyphIndex: 300

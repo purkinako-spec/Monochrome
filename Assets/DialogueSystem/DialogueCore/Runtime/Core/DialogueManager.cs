@@ -45,6 +45,20 @@ namespace Runtime.Dialogue.Logic
         private bool isWaitingExternalInput = false;
         public bool IsWaitingExternalInput => isWaitingExternalInput;
 
+        /// <summary>
+        /// 現在話しかけている会話対象（NPCオブジェクト等）。
+        /// 会話開始スクリプト（DialogueStarter等）から SetCurrentTarget または StartDialogue 経由で設定されます。
+        /// </summary>
+        public GameObject CurrentTarget { get; private set; }
+
+        /// <summary>
+        /// 会話対象のオブジェクトを設定します。
+        /// </summary>
+        public void SetCurrentTarget(GameObject target)
+        {
+            CurrentTarget = target;
+        }
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -90,6 +104,15 @@ namespace Runtime.Dialogue.Logic
         /// <summary>
         /// 会話開始 (Container指定 + 終了コールバック) - 既存互換用
         /// </summary>
+        /// <summary>
+        /// 会話相手のオブジェクトを指定して会話を開始します。
+        /// </summary>
+        public void StartDialogue(DialogueContainer container, GameObject target, Action onEnded = null)
+        {
+            CurrentTarget = target;
+            StartDialogue(container, onEnded);
+        }
+
         public void StartDialogue(DialogueContainer container, Action onEnded = null)
         {
             
@@ -249,6 +272,7 @@ namespace Runtime.Dialogue.Logic
             isAutoMode = false;
             isSkipMode = false;
             isWaitingExternalInput = false;
+            CurrentTarget = null;
         }
 
         // --- Auto Mode ---

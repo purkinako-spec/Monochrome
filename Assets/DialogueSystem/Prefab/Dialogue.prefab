@@ -826,6 +826,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96776bbc863df5d4a8e4c9716eb786df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Plugins.Portraits.StandardUIPortraitHandler
+  portraitDatabases:
+  - {fileID: 11400000, guid: 013f5851111f43f5865379f198940e5c, type: 2}
   profiles:
   - {fileID: 11400000, guid: a93e4bc1904e7e342bb67f47525e6f30, type: 2}
   portraitSlots:
@@ -1622,8 +1624,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u3042"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: efc93d5a0d9bae44397cc795954f0b92, type: 2}
-  m_sharedMaterial: {fileID: 5939766848372476044, guid: efc93d5a0d9bae44397cc795954f0b92, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c9cf12b0a9dacc64abb82763dd275784, type: 2}
+  m_sharedMaterial: {fileID: 881430976725680482, guid: c9cf12b0a9dacc64abb82763dd275784, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1960,8 +1962,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u3042"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: efc93d5a0d9bae44397cc795954f0b92, type: 2}
-  m_sharedMaterial: {fileID: 5939766848372476044, guid: efc93d5a0d9bae44397cc795954f0b92, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c9cf12b0a9dacc64abb82763dd275784, type: 2}
+  m_sharedMaterial: {fileID: 881430976725680482, guid: c9cf12b0a9dacc64abb82763dd275784, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
