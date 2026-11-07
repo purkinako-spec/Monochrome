@@ -21,6 +21,13 @@ namespace Runtime.Dialogue.Logic
 
         public static DialogueManager Instance { get; private set; }
 
+        /// <summary>
+        /// 多言語化（ローカライズ）テキスト解決プロバイダー。
+        /// Addressables や外部パッケージによる多言語辞書を差し込むことができます。
+        /// 未設定時はノード記載のテキストがそのまま使用されます（完全非破壊）。
+        /// </summary>
+        public static IDialogueTextResolver TextResolver { get; set; }
+
         [SerializeField] private DialogueContainer currentContainer;
         public IDialogueView CurrentView { get; private set; }
         public DialogueState CurrentState { get; private set; } = DialogueState.Idle;
@@ -160,9 +167,18 @@ namespace Runtime.Dialogue.Logic
             }
 
             string speakerID = currentNode.speakerName;
+            string rawText = currentNode.dialogueText;
+
+            // ローカライズリゾルバーが登録されていればテキスト・話者を解決
+            if (TextResolver != null)
+            {
+                rawText = TextResolver.ResolveText(currentNode.nodeID, rawText);
+                speakerID = TextResolver.ResolveSpeaker(speakerID);
+            }
+
             string cleanText;
             List<DialogueCommand> commands;
-            DialogueTagParser.ParseText(currentNode.dialogueText, out cleanText, out commands);
+            DialogueTagParser.ParseText(rawText, out cleanText, out commands);
 
             CurrentView?.DisplaySentence(speakerID, cleanText, commands, () =>
             {
@@ -177,7 +193,27 @@ namespace Runtime.Dialogue.Logic
 
                     if (DialogueBranchDispatcher.Instance != null)
                     {
-                        bool handled = DialogueBranchDispatcher.Instance.TryHandleBranch(currentNode.choices, (nextID) =>
+                        var displayChoices = currentNode.choices;
+                        if (TextResolver != null && currentNode.choices != null)
+                        {
+                            displayChoices = new List<ChoiceData>();
+                            foreach (var c in currentNode.choices)
+                            {
+                                if (c == null) continue;
+                                var copy = new ChoiceData
+                                {
+                                    choiceText = TextResolver.ResolveChoice(c.targetNodeID, c.choiceText),
+                                    targetNodeID = c.targetNodeID,
+                                    branchType = c.branchType,
+                                    conditionKey = c.conditionKey,
+                                    conditionOperator = c.conditionOperator,
+                                    conditionValue = c.conditionValue
+                                };
+                                displayChoices.Add(copy);
+                            }
+                        }
+
+                        bool handled = DialogueBranchDispatcher.Instance.TryHandleBranch(displayChoices, (nextID) =>
                         {
                             CurrentState = DialogueState.Playing;
                             StartDialogue(nextID);

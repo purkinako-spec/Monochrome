@@ -385,6 +385,10 @@ PrefabInstance:
       propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7719283018274619283, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: dialogueView
+      value: 
+      objectReference: {fileID: 91740352}
     - target: {fileID: 7807668273551901627, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_Name
       value: Dialogue

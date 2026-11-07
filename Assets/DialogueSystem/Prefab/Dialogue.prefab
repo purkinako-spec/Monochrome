@@ -1165,6 +1165,7 @@ GameObject:
   - component: {fileID: 8933680894215925928}
   - component: {fileID: 8388730323635852854}
   - component: {fileID: 1474480079271010582}
+  - component: {fileID: 7719283018274619283}
   m_Layer: 0
   m_Name: CommandHandlers
   m_TagString: Untagged
@@ -2773,6 +2774,7 @@ MonoBehaviour:
   typewriterAudio: {fileID: 6898096912201963555}
   typingSpeed: 0.05
   defaultFont: {fileID: 11400000, guid: efc93d5a0d9bae44397cc795954f0b92, type: 2}
+  fontDatabase: {fileID: 11400000, guid: f318ea0b549846169ca0027fe6cc2560, type: 2}
 --- !u!1 &8828866141055914442
 GameObject:
   m_ObjectHideFlags: 0
@@ -3150,3 +3152,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+
+--- !u!114 &7719283018274619283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4972252349651462805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9816f88da4ac417daa44bc93fbe6e529, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Plugins.Commands.FontCommandHandler
+  dialogueView: {fileID: 0}

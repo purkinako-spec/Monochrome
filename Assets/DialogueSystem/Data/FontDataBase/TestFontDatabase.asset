@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a49165b6a094447589678f4d42a2c8d0, type: 3}
+  m_Name: TestFontDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueFontDatabase
+  fontStyles:
+  - styleName: default
+    font: {fileID: 11400000, guid: 2cff112cf2f3a1b4cb3327fc1ae3a972, type: 2}
+  - styleName: tegaki
+    font: {fileID: 11400000, guid: c9cf12b0a9dacc64abb82763dd275784, type: 2}
+  - styleName: asobi
+    font: {fileID: 11400000, guid: c58a72039d3491942a4feded40b89ea2, type: 2}

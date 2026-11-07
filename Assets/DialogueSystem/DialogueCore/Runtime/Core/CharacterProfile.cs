@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +19,10 @@ namespace Runtime.Dialogue.Core
         public string displayName;
 
         [Tooltip("キャラクター固有のAnimatorController（モーション再生時に動的割り当て）")]
-        public RuntimeAnimatorController animatorController; // 👈 追加
+        public RuntimeAnimatorController animatorController;
+
+        [Tooltip("このキャラクターが喋る時の標準フォントスタイル（例: default, horror, robot等。空欄の場合は全体標準フォント）")]
+        public string defaultFontStyle = "default";
 
         public List<ExpressionData> expressions = new List<ExpressionData>();
 
