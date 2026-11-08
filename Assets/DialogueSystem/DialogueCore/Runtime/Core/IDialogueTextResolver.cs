@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Runtime.Dialogue.Core
 {
     /// <summary>
@@ -15,5 +17,8 @@ namespace Runtime.Dialogue.Core
 
         /// <summary>選択肢のローカライズされた文字列を取得します</summary>
         string ResolveChoice(string choiceKey, string defaultChoiceText);
+
+        /// <summary>ノードIDを元にローカライズされたボイスを取得します（任意）</summary>
+        AudioClip ResolveVoice(string nodeID, AudioClip defaultVoice = null) => defaultVoice;
     }
 }

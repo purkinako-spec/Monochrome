@@ -265,6 +265,7 @@ GameObject:
   - component: {fileID: 1160185509896114376}
   - component: {fileID: 3132558212123257881}
   - component: {fileID: 1289663534568973122}
+  - component: {fileID: 6061078495363347770}
   m_Layer: 0
   m_Name: BranchHandlers
   m_TagString: Untagged
@@ -338,6 +339,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc2483700ea8cc3498b1ce414718b273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Branching.RandomChoiceHandler
+--- !u!114 &6061078495363347770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2421384250994764640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ce31cea2ee7a3f40be6549819c55620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Branching.KeyNavBranchHandler
+  branchUIPrefab: {fileID: 7961670325720567414, guid: 95b5cc79649d05a45afa261aebea92b9, type: 3}
+  uiParent: {fileID: 0}
+  cursorObject: {fileID: 8104698720129308695, guid: 8968b826d7205eb4dab19ea08c1e1744, type: 3}
+  cursorOffset: {x: -40, y: 0}
+  selectedSprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  normalSprite: {fileID: 0}
+  selectedTextColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  normalTextColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedScale: 1.05
+  cursorSEKey: cursor_move
+  submitSEKey: choice_select
+  loopNavigation: 1
+  repeatDelay: 0.2
 --- !u!1 &2711974477840850921
 GameObject:
   m_ObjectHideFlags: 0
@@ -1429,6 +1455,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Commands.EndDialogueCommandHandler
   dialogueCanvasGroup: {fileID: 1939402162261886066}
+--- !u!114 &7719283018274619283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4972252349651462805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9816f88da4ac417daa44bc93fbe6e529, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Plugins.Commands.FontCommandHandler
+  dialogueView: {fileID: 0}
 --- !u!1 &5067534651970326989
 GameObject:
   m_ObjectHideFlags: 0
@@ -2794,6 +2833,7 @@ GameObject:
   - component: {fileID: 7537792580498986009}
   - component: {fileID: 6898096912201963555}
   - component: {fileID: 4204390935666897737}
+  - component: {fileID: 2178527059748083262}
   m_Layer: 0
   m_Name: DialogueSysem
   m_TagString: Untagged
@@ -2830,6 +2870,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.DialogueManager
   currentContainer: {fileID: 11400000, guid: c506cc27cc8a72a44890eb3907072db7, type: 2}
+  defaultView: {fileID: 0}
   baseAutoWaitTime: 1
   autoWaitTimePerChar: 0.05
 --- !u!114 &1105928144692707219
@@ -2960,6 +3001,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueLogManager
   maxLogCount: 100
+--- !u!114 &2178527059748083262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8828866141055914442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a51feb4e133566439e3463117930098, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Plugins.Localization.DialogueLocalizationManager
+  config: {fileID: 11400000, guid: 25d51d1678f7d4b479b90274c56aafc7, type: 2}
+  autoRegisterResolver: 0
+  currentLanguageCode: ja
+  isLoading: 0
 --- !u!1 &8916556819567149606
 GameObject:
   m_ObjectHideFlags: 0
@@ -3152,17 +3209,3 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-
---- !u!114 &7719283018274619283
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4972252349651462805}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9816f88da4ac417daa44bc93fbe6e529, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Plugins.Commands.FontCommandHandler
-  dialogueView: {fileID: 0}

@@ -1,8 +1,10 @@
-﻿using Runtime.Dialogue;
+using Runtime.Dialogue;
 using Runtime.Dialogue.Core;
 using Runtime.Dialogue.Editor;
+using Runtime.Dialogue.Plugins.Localization;
+using Runtime.Dialogue.Plugins.Localization.Editor;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -20,59 +22,93 @@ namespace DialogueSystem.Editor
         private Button saveButton;
         private Button newButton;
         private Button selectButton;
-        private Button debugToggleButton;
-        private Button forceSampleButton;
+        private Button autoLayoutButton;
+        private ToolbarToggle miniMapToggle;
+        private DropdownField languageDropdown;
         private Label statusLabel;
+
+        private string currentPreviewLang = "Original (ja)";
+        private string currentHighlightedNodeID = "";
 
         [MenuItem("Tools/Dialogue/Dialogue Editor")]
         public static void OpenDialogueEditor()
         {
             var window = GetWindow<DialogueEditorWindow>("Dialogue Editor");
-            window.minSize = new Vector2(600, 400);
+            window.minSize = new Vector2(700, 450);
+        }
+
+        /// <summary>
+        /// Project からアセットをダブルクリックした際に直接コンテナを渡して開く
+        /// </summary>
+        public static void OpenAndLoadContainer(DialogueContainer container)
+        {
+            var window = GetWindow<DialogueEditorWindow>("Dialogue Editor");
+            window.minSize = new Vector2(700, 450);
+            window.SetContainerAndLoad(container);
         }
 
         private void OnEnable()
         {
-            // 先にツールバーを作ってから GraphView を追加（描画順の確実化）
             ConstructToolbar();
             ConstructGraphView();
             UpdateStatus("Editor ready");
+
+            Runtime.Dialogue.Logic.DialogueManager.OnNodeStarted += HandleNodeStartedOnPlaymode;
         }
 
         private void OnDisable()
         {
+            Runtime.Dialogue.Logic.DialogueManager.OnNodeStarted -= HandleNodeStartedOnPlaymode;
+
             if (graphView != null)
             {
-                // エラー防止のため Remove() ではなく RemoveFromHierarchy() に変更
                 graphView.RemoveFromHierarchy();
                 graphView = null;
             }
         }
 
+        private void HandleNodeStartedOnPlaymode(string nodeID, DialogueNode node)
+        {
+            if (graphView == null) return;
+
+            var nodeViews = graphView.graphElements.ToList().OfType<DialogueNodeView>().ToList();
+            foreach (var nv in nodeViews)
+            {
+                bool isTarget = nv.NodeData.nodeID == nodeID;
+                nv.SetPlayingHighlight(isTarget);
+            }
+            currentHighlightedNodeID = nodeID;
+        }
+
+        public void SetContainerAndLoad(DialogueContainer container)
+        {
+            currentContainer = container;
+            if (containerField != null)
+            {
+                containerField.value = currentContainer;
+            }
+            LoadCurrentContainer();
+        }
+
         private void ConstructGraphView()
         {
-            // 1. ツールバーの下の「残りの領域」をすべて埋めるベースコンテナ
             var graphContainer = new VisualElement();
             graphContainer.style.flexGrow = 1;
             graphContainer.style.backgroundColor = new StyleColor(new Color(0.08f, 0.08f, 0.08f));
 
-            // 2. GraphView を作成
             graphView = new DialogueGraphView
             {
                 name = "Dialogue Graph"
             };
 
-            // ベースコンテナいっぱいに広げる
             graphView.StretchToParentSize();
 
-            // 3. コンテナに GraphView を入れ、ルートに追加
             graphContainer.Add(graphView);
             rootVisualElement.Add(graphContainer);
         }
 
         private void ConstructToolbar()
         {
-            // ツールバー（上部固定）
             var toolbar = new VisualElement();
             toolbar.style.flexDirection = FlexDirection.Row;
             toolbar.style.alignItems = Align.Center;
@@ -86,7 +122,7 @@ namespace DialogueSystem.Editor
             {
                 objectType = typeof(DialogueContainer),
                 allowSceneObjects = false,
-                style = { flexGrow = 1, minWidth = 200 }
+                style = { flexGrow = 1, minWidth = 160 }
             };
             containerField.RegisterValueChangedCallback(evt =>
             {
@@ -95,7 +131,7 @@ namespace DialogueSystem.Editor
             });
             toolbar.Add(containerField);
 
-            // Select (ObjectPicker)
+            // Select
             selectButton = new Button(() => EditorGUIUtility.ShowObjectPicker<DialogueContainer>(currentContainer, false, "", 0))
             { text = "Select" };
             toolbar.Add(selectButton);
@@ -119,56 +155,7 @@ namespace DialogueSystem.Editor
             toolbar.Add(newButton);
 
             // Load
-            loadButton = new Button(() =>
-            {
-                UpdateStatus("[Load] Start");
-                try
-                {
-                    if (currentContainer == null)
-                    {
-                        string[] guids = AssetDatabase.FindAssets("t:DialogueContainer");
-                        if (guids.Length > 0)
-                        {
-                            string assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-                            currentContainer = AssetDatabase.LoadAssetAtPath<DialogueContainer>(assetPath);
-                            containerField.value = currentContainer;
-                            UpdateStatus("[Auto] Assigned: " + assetPath);
-                        }
-                        else
-                        {
-                            UpdateStatus("[Load] No DialogueContainer asset found");
-                            Debug.LogWarning("[DialogueEditor] Load: DialogueContainer が見つかりません。");
-                            return;
-                        }
-                    }
-
-                    // ClearGraph 呼び出し（名前変更済み）
-                    graphView.ClearGraph();
-                    UpdateStatus("[Load] Cleared graph");
-
-                    Debug.Log("[DialogueEditor] Calling DialogueGraphViewIO.Load...");
-                    DialogueGraphViewIO.Load(graphView, currentContainer);
-
-                    int nodeCount = graphView.graphElements.ToList().OfType<DialogueNodeView>().Count();
-                    UpdateStatus($"[Load] Completed. Nodes: {nodeCount}");
-
-                    if (nodeCount == 0)
-                    {
-                        UpdateStatus("[Load] Container empty — creating debug sample node");
-                        graphView.CreateNode("Sample Node", new Vector2(100, 100));
-                        graphView.FrameAll();
-                    }
-                    else
-                    {
-                        graphView.FrameAll();
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    UpdateStatus("[Load] Exception: " + ex.Message);
-                    Debug.LogError("[DialogueEditor] Load failed: " + ex);
-                }
-            })
+            loadButton = new Button(() => LoadCurrentContainer())
             { text = "Load" };
             toolbar.Add(loadButton);
 
@@ -200,44 +187,181 @@ namespace DialogueSystem.Editor
             { text = "Save" };
             toolbar.Add(saveButton);
 
-            // ツールメニュー（旧 Handler Info ボタン）
+            // Auto Layout ボタン
+            autoLayoutButton = new Button(() =>
+            {
+                if (graphView != null)
+                {
+                    DialogueAutoLayout.Layout(graphView);
+                    graphView.FrameAll();
+                    UpdateStatus("[Layout] Auto-aligned nodes");
+                }
+            })
+            { text = "Auto Layout" };
+            toolbar.Add(autoLayoutButton);
+
+            // MiniMap トグル
+            miniMapToggle = new ToolbarToggle() { text = "Map", value = true };
+            miniMapToggle.style.marginLeft = 4;
+            miniMapToggle.RegisterValueChangedCallback(evt =>
+            {
+                graphView?.ToggleMiniMap(evt.newValue);
+            });
+            toolbar.Add(miniMapToggle);
+
+            // 多言語プレビュードロップダウン
+            var langChoices = GetAvailableLanguageOptions();
+            languageDropdown = new DropdownField(langChoices, 0);
+            languageDropdown.style.width = 110;
+            languageDropdown.style.marginLeft = 4;
+            languageDropdown.RegisterValueChangedCallback(evt =>
+            {
+                currentPreviewLang = evt.newValue;
+                ApplyLanguagePreview(currentPreviewLang);
+            });
+            toolbar.Add(languageDropdown);
+
+            // ツールメニュー
             var toolsMenuButton = new Button(() =>
             {
                 GenericMenu menu = new GenericMenu();
-
-                // 1. 既存の Handler Info ウィンドウを開く
-                menu.AddItem(new GUIContent("Handler Info"), false, () =>
-                {
-                    DialogueSystem.Editor.HandlerInfoWindow.ShowWindow();
-                });
-
-                // 2. 追加ウィンドウ用のプレースホルダー1
-                menu.AddItem(new GUIContent("FlagManagerWindow"), false, () =>
-                {
-                    FlagManagerWindow.ShowWindow();
-                });
-
-                // 3. 追加ウィンドウ用のプレースホルダー2
-                menu.AddItem(new GUIContent("PortraitCommandBuilderWindow"), false, () =>
-                {
-                    PortraitCommandBuilderWindow.ShowWindow();
-                });
-
-                // マウスカーソルの位置にドロップダウンを表示
+                menu.AddItem(new GUIContent("Container Manager"), false, () => DialogueContainerWindow.OpenWindow());
+                menu.AddItem(new GUIContent("Localization Window"), false, () => DialogueLocalizationWindow.OpenWindow());
+                menu.AddItem(new GUIContent("Flag Manager"), false, () => FlagManagerWindow.ShowWindow());
+                menu.AddItem(new GUIContent("Handler Info"), false, () => HandlerInfoWindow.ShowWindow());
+                menu.AddItem(new GUIContent("Portrait Command Builder"), false, () => PortraitCommandBuilderWindow.ShowWindow());
                 menu.ShowAsContext();
             })
             { text = "Tools ▾" };
             toolbar.Add(toolsMenuButton);
 
-            // ステータスラベル（右端）
+            // ステータスラベル
             statusLabel = new Label("Status: ready");
             statusLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             statusLabel.style.marginLeft = 8;
-            statusLabel.style.minWidth = 220;
+            statusLabel.style.minWidth = 150;
             toolbar.Add(statusLabel);
 
-            // ツールバーをルートに追加（最前面）
             rootVisualElement.Add(toolbar);
+        }
+
+        private void LoadCurrentContainer()
+        {
+            UpdateStatus("[Load] Start");
+            try
+            {
+                if (currentContainer == null)
+                {
+                    string[] guids = AssetDatabase.FindAssets("t:DialogueContainer");
+                    if (guids.Length > 0)
+                    {
+                        string assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+                        currentContainer = AssetDatabase.LoadAssetAtPath<DialogueContainer>(assetPath);
+                        containerField.value = currentContainer;
+                        UpdateStatus("[Auto] Assigned: " + assetPath);
+                    }
+                    else
+                    {
+                        UpdateStatus("[Load] No DialogueContainer asset found");
+                        Debug.LogWarning("[DialogueEditor] Load: DialogueContainer が見つかりません。");
+                        return;
+                    }
+                }
+
+                graphView.ClearGraph();
+                DialogueGraphViewIO.Load(graphView, currentContainer);
+
+                int nodeCount = graphView.graphElements.ToList().OfType<DialogueNodeView>().Count();
+                UpdateStatus($"[Load] Completed. Nodes: {nodeCount}");
+
+                if (nodeCount == 0)
+                {
+                    graphView.CreateNode("Sample Node", new Vector2(100, 100));
+                }
+
+                graphView.FrameAll();
+
+                // 現在選択されているプレビュー言語を反映
+                ApplyLanguagePreview(currentPreviewLang);
+            }
+            catch (System.Exception ex)
+            {
+                UpdateStatus("[Load] Exception: " + ex.Message);
+                Debug.LogError("[DialogueEditor] Load failed: " + ex);
+            }
+        }
+
+        private List<string> GetAvailableLanguageOptions()
+        {
+            List<string> options = new List<string> { "Original (ja)" };
+
+            // プロジェクト内の DialogueTextTable を検索して言語一覧に追加
+            string[] guids = AssetDatabase.FindAssets("t:DialogueTextTable");
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var table = AssetDatabase.LoadAssetAtPath<DialogueTextTable>(path);
+                if (table != null && !string.IsNullOrEmpty(table.LanguageCode))
+                {
+                    string label = $"{table.LanguageDisplayName} ({table.LanguageCode})";
+                    if (!options.Contains(label)) options.Add(label);
+                }
+            }
+            return options;
+        }
+
+        private void ApplyLanguagePreview(string selectedOption)
+        {
+            if (graphView == null) return;
+
+            var nodeViews = graphView.graphElements.ToList().OfType<DialogueNodeView>().ToList();
+            if (selectedOption.StartsWith("Original"))
+            {
+                // 原文モード（編集可能）に戻す
+                foreach (var nv in nodeViews)
+                {
+                    nv.SetPreviewTranslation(null);
+                }
+                UpdateStatus("[Preview] Original Text");
+                return;
+            }
+
+            // 言語コードを抽出（例: "English (en)" -> "en"）
+            int startIdx = selectedOption.LastIndexOf('(');
+            int endIdx = selectedOption.LastIndexOf(')');
+            if (startIdx < 0 || endIdx <= startIdx) return;
+
+            string code = selectedOption.Substring(startIdx + 1, endIdx - startIdx - 1);
+
+            // 対象言語の DialogueTextTable を検索
+            string[] guids = AssetDatabase.FindAssets("t:DialogueTextTable");
+            DialogueTextTable targetTable = null;
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var table = AssetDatabase.LoadAssetAtPath<DialogueTextTable>(path);
+                if (table != null && table.LanguageCode.Equals(code, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    targetTable = table;
+                    break;
+                }
+            }
+
+            if (targetTable != null)
+            {
+                foreach (var nv in nodeViews)
+                {
+                    if (targetTable.TryGetText(nv.NodeData.nodeID, out string translated))
+                    {
+                        nv.SetPreviewTranslation(translated);
+                    }
+                    else
+                    {
+                        nv.SetPreviewTranslation("[未翻訳 / Missing Translation]");
+                    }
+                }
+                UpdateStatus($"[Preview] Applied: {code}");
+            }
         }
 
         private void UpdateStatus(string message)
@@ -251,7 +375,6 @@ namespace DialogueSystem.Editor
 
         private void OnGUI()
         {
-            // ObjectPicker の選択確定を受け取る
             if (Event.current.commandName == "ObjectSelectorClosed")
             {
                 var picked = EditorGUIUtility.GetObjectPickerObject() as DialogueContainer;

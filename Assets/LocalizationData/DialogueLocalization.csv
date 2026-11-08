@@ -1,0 +1,9 @@
+﻿Key,Type,Speaker,Japanese,English,Note
+Node_d46da,Dialogue,釣り人,"[dialogue_fade:type=in,time=0.5]釣りする？","[dialogue_fade:type=in,time=0.5]fishing?",
+Node_d46da#c0,Choice,,する!!,Yes!!,
+Node_d46da#c1,Choice,,しない,No,
+Node_1f273,Dialogue,釣り人,よし始めよう!!,Lets Start,
+Node_b13a3,Dialogue,釣り人,そっかじゃあね,By,
+Node_cd479,Dialogue,釣り人,[end_dialogue:fade=0.5],[end_dialogue:fade=0.5],
+Node_7c912,Dialogue,,"[call:mode=nearest,script=SceneLoader,method=LoadScene,arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]","[call:mode=nearest,script=SceneLoader,method=LoadScene,arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]",
+speaker_釣り人,Speaker,釣り人,釣り人,Fisherman,

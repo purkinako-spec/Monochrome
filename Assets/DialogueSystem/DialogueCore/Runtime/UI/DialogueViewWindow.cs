@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -56,9 +56,29 @@ namespace Runtime.Dialogue
             CloseView();
         }
 
+        private void Start()
+        {
+            // Awakeの実行順序によってDialogueManager.Instanceが未初期化だった場合のフォールバック登録
+            if (DialogueManager.Instance != null && DialogueManager.Instance.CurrentView == null)
+            {
+                DialogueManager.Instance.RegisterView(this);
+            }
+        }
+
         /// <summary>
         /// フォントスタイル名（default, horror, robot等）からフォントを適用します。
         /// </summary>
+        /// <summary>
+        /// 使用するフォントデータベースを動的に変更します（多言語対応・言語切り替え用）。
+        /// </summary>
+        public void SetFontDatabase(DialogueFontDatabase db)
+        {
+            fontDatabase = db;
+            ResetFont();
+        }
+
+        public DialogueFontDatabase FontDatabase => fontDatabase;
+
         public void SetFontStyle(string styleName, bool persistent = false)
         {
             TMP_FontAsset targetFont = null;

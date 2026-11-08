@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60eeb8ad2dbd909449e0667f8440ea3a, type: 3}
   m_Name: TestCharacterProfile 1
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.CharacterProfile
-  characterID: n
+  characterID: ???
   displayName: ???
   animatorController: {fileID: 0}
+  defaultFontStyle: asobi
   expressions:
   - expressionID: default
     faceSprite: {fileID: 632661706, guid: 92202b0c1ad99b543a20c06cc5a19e74, type: 3}

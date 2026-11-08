@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Runtime.Dialogue.Core;
 using Runtime.Dialogue.Branching;
+using Runtime.Dialogue;
 
 namespace Runtime.Dialogue.Logic
 {
@@ -15,11 +16,43 @@ namespace Runtime.Dialogue.Logic
         Ended
     }
 
+    [AddComponentMenu("Dialogue/Core/Dialogue Manager")]
+    [DisallowMultipleComponent]
     public class DialogueManager : MonoBehaviour
     {
         public string CurrentSpeaker => currentNode != null ? currentNode.speakerName : string.Empty;
 
-        public static DialogueManager Instance { get; private set; }
+        private static DialogueManager instance;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            instance = null;
+        }
+
+        public static DialogueManager Instance
+        {
+            get
+            {
+                if (instance == null || !instance)
+                {
+                    instance = FindFirstObjectByType<DialogueManager>();
+                    if ((instance == null || !instance) && Application.isPlaying)
+                    {
+                        var go = new GameObject("[DialogueManager]");
+                        instance = go.AddComponent<DialogueManager>();
+                        if (go.transform.parent == null) DontDestroyOnLoad(go);
+                    }
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
+
+        /// <summary>
+        /// ノード再生が切り替わったときに発火するイベント（ノードID, ノードデータ）。Editorでのハイライト等に使用。
+        /// </summary>
+        public static event Action<string, DialogueNode> OnNodeStarted;
 
         /// <summary>
         /// 多言語化（ローカライズ）テキスト解決プロバイダー。
@@ -29,7 +62,23 @@ namespace Runtime.Dialogue.Logic
         public static IDialogueTextResolver TextResolver { get; set; }
 
         [SerializeField] private DialogueContainer currentContainer;
-        public IDialogueView CurrentView { get; private set; }
+        [SerializeField, Tooltip("ダイアログUIのView。未指定の場合はシーン内から自動取得します")]
+        private DialogueViewWindow defaultView;
+
+        private IDialogueView currentView;
+        public IDialogueView CurrentView
+        {
+            get
+            {
+                if (currentView == null)
+                {
+                    ResolveDefaultView();
+                }
+                return currentView;
+            }
+            private set => currentView = value;
+        }
+
         public DialogueState CurrentState { get; private set; } = DialogueState.Idle;
 
         private DialogueNode currentNode;
@@ -68,8 +117,63 @@ namespace Runtime.Dialogue.Logic
 
         private void Awake()
         {
-            if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            if (instance == null || !instance)
+            {
+                instance = this;
+                if (transform.parent == null)
+                {
+                    DontDestroyOnLoad(gameObject);
+                }
+            }
+            else if (instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            ResolveDefaultView();
+        }
+
+        private void Start()
+        {
+            if (currentView == null)
+            {
+                ResolveDefaultView();
+            }
+        }
+
+        /// <summary>
+        /// シーンまたはInspectorからIDialogueView（DialogueViewWindow）を自動解決します。
+        /// </summary>
+        public void ResolveDefaultView()
+        {
+            if (currentView != null) return;
+
+            // 1. Inspectorで指定された defaultView があれば優先使用
+            if (defaultView != null)
+            {
+                RegisterView(defaultView);
+                return;
+            }
+
+            // 2. シーン内の DialogueViewWindow を検索（非アクティブも含む）
+            var foundWindow = UnityEngine.Object.FindAnyObjectByType<DialogueViewWindow>(FindObjectsInactive.Include);
+            if (foundWindow != null)
+            {
+                RegisterView(foundWindow);
+                return;
+            }
+
+            // 3. DialogueViewWindow 以外の IDialogueView 実装コンポーネントを検索（非アクティブも含む）
+            var allMonoBehaviours = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var mb in allMonoBehaviours)
+            {
+                if (mb is IDialogueView customView)
+                {
+                    RegisterView(customView);
+                    return;
+                }
+            }
         }
 
         // 外部入力待ちのロック/解除
@@ -96,24 +200,35 @@ namespace Runtime.Dialogue.Logic
         }
 
         /// <summary>
-        /// 会話開始 (Container指定 + 開始ノードID指定 + 終了コールバック)
-        /// </summary>
-        public void StartDialogue(DialogueContainer container, string startNodeID, Action onEnded = null)
-        {
-            if (container != null)
-            {
-                currentContainer = container;
-            }
-            onDialogueEndedCallback = onEnded;
-            StartDialogue(startNodeID);
-        }
-
-        /// <summary>
-        /// 会話開始 (Container指定 + 終了コールバック) - 既存互換用
-        /// </summary>
-        /// <summary>
         /// 会話相手のオブジェクトを指定して会話を開始します。
         /// </summary>
+        /// <summary>
+        /// Addressables アドレスを指定してコンテナを非同期ロードし、会話を開始します。
+        /// </summary>
+        /// <param name="containerAddress">Addressables のアドレス名</param>
+        /// <param name="target">会話相手オブジェクト（任意）</param>
+        /// <param name="onEnded">会話終了時コールバック</param>
+        /// <param name="autoUnloadOnEnd">会話終了時に自動でコンテナをアンロード（メモリ解放）するかどうか</param>
+        public async void StartDialogueWithAddress(string containerAddress, GameObject target = null, Action onEnded = null, bool autoUnloadOnEnd = false)
+        {
+            if (string.IsNullOrEmpty(containerAddress)) return;
+
+            var container = await DialogueContainerManager.Instance.LoadContainerAsync(containerAddress);
+            if (container != null)
+            {
+                Action wrappedCallback = () =>
+                {
+                    onEnded?.Invoke();
+                    if (autoUnloadOnEnd)
+                    {
+                        DialogueContainerManager.Instance.UnloadContainer(containerAddress);
+                    }
+                };
+
+                StartDialogue(container, target, wrappedCallback);
+            }
+        }
+
         public void StartDialogue(DialogueContainer container, GameObject target, Action onEnded = null)
         {
             CurrentTarget = target;
@@ -122,7 +237,6 @@ namespace Runtime.Dialogue.Logic
 
         public void StartDialogue(DialogueContainer container, Action onEnded = null)
         {
-            
             if (container != null)
             {
                 currentContainer = container;
@@ -131,12 +245,18 @@ namespace Runtime.Dialogue.Logic
             StartDialogue(string.Empty);
         }
 
-        /// <summary>
-        /// 会話開始 (ノードIDのみ指定) - 内部処理用
-        /// </summary>
         public void StartDialogue(string startNodeID = "")
         {
-            
+            if (CurrentView == null)
+            {
+                ResolveDefaultView();
+            }
+
+            if (CurrentView == null)
+            {
+                Debug.LogWarning("[DialogueManager] 有効な IDialogueView（DialogueViewWindow等）が見つかりません。会話UIが表示されない可能性があります。");
+            }
+
             if (currentContainer == null)
             {
                 Debug.LogError("DialogueContainer が設定されていません！");
@@ -166,14 +286,32 @@ namespace Runtime.Dialogue.Logic
                 return;
             }
 
+            OnNodeStarted?.Invoke(currentNode.nodeID, currentNode);
+
             string speakerID = currentNode.speakerName;
             string rawText = currentNode.dialogueText;
+
+            // ローカライズリゾルバーが未設定の場合、シーン内の LocalizationManager から自動取得を試みる
+            if (TextResolver == null)
+            {
+                var locMgr = UnityEngine.Object.FindFirstObjectByType<Runtime.Dialogue.Plugins.Localization.DialogueLocalizationManager>();
+                if (locMgr != null)
+                {
+                    TextResolver = locMgr.TextResolver;
+                }
+            }
 
             // ローカライズリゾルバーが登録されていればテキスト・話者を解決
             if (TextResolver != null)
             {
+                string orig = rawText;
                 rawText = TextResolver.ResolveText(currentNode.nodeID, rawText);
                 speakerID = TextResolver.ResolveSpeaker(speakerID);
+                Debug.Log($"[DialogueManager] ローカライズ解決: Node={currentNode.nodeID}, 元文='{orig}' -> 解決後='{rawText}'");
+            }
+            else
+            {
+                Debug.LogWarning("[DialogueManager] TextResolver が null のためデフォルトテキストを使用します。");
             }
 
             string cleanText;
@@ -197,12 +335,19 @@ namespace Runtime.Dialogue.Logic
                         if (TextResolver != null && currentNode.choices != null)
                         {
                             displayChoices = new List<ChoiceData>();
-                            foreach (var c in currentNode.choices)
+                            for (int i = 0; i < currentNode.choices.Count; i++)
                             {
+                                var c = currentNode.choices[i];
                                 if (c == null) continue;
+                                string choiceKey = $"{currentNode.nodeID}#c{i}";
+                                string resolved = TextResolver.ResolveChoice(choiceKey, c.choiceText);
+                                if (resolved == c.choiceText && !string.IsNullOrEmpty(c.targetNodeID))
+                                {
+                                    resolved = TextResolver.ResolveChoice(c.targetNodeID, c.choiceText);
+                                }
                                 var copy = new ChoiceData
                                 {
-                                    choiceText = TextResolver.ResolveChoice(c.targetNodeID, c.choiceText),
+                                    choiceText = resolved,
                                     targetNodeID = c.targetNodeID,
                                     branchType = c.branchType,
                                     conditionKey = c.conditionKey,

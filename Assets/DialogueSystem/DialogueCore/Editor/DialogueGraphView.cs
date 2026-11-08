@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Experimental.GraphView;
@@ -10,6 +10,10 @@ namespace DialogueSystem.Editor
 {
     public class DialogueGraphView : GraphView
     {
+        private MiniMap miniMap;
+
+        public MiniMap MiniMap => miniMap;
+
         public DialogueGraphView()
         {
             SetupGridBackground();
@@ -19,6 +23,7 @@ namespace DialogueSystem.Editor
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
 
+            SetupMiniMap();
             SetupContextMenu();
         }
 
@@ -27,6 +32,22 @@ namespace DialogueSystem.Editor
             var gridBackground = new GridBackground();
             gridBackground.StretchToParentSize();
             Insert(0, gridBackground);
+        }
+
+        private void SetupMiniMap()
+        {
+            miniMap = new MiniMap { anchored = true };
+            // 右上に配置 (または左下など)
+            miniMap.SetPosition(new Rect(10, 30, 200, 140));
+            Add(miniMap);
+        }
+
+        public void ToggleMiniMap(bool visible)
+        {
+            if (miniMap != null)
+            {
+                miniMap.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
 
         private void SetupContextMenu()
@@ -39,6 +60,19 @@ namespace DialogueSystem.Editor
                     Vector2 graphPosition = contentViewContainer.WorldToLocal(menuAction.eventInfo.mousePosition);
                     CreateNode("New Dialogue Node", graphPosition);
                 });
+
+                if (Application.isPlaying)
+                {
+                    evt.menu.AppendAction("Jump to Selected Node (Playmode)", (menuAction) =>
+                    {
+                        var selectedNode = selection.OfType<DialogueNodeView>().FirstOrDefault();
+                        if (selectedNode != null && Runtime.Dialogue.Logic.DialogueManager.Instance != null)
+                        {
+                            Runtime.Dialogue.Logic.DialogueManager.Instance.StartDialogue(selectedNode.NodeData.nodeID);
+                            Debug.Log($"[DialogueGraphView] Jumped to node: {selectedNode.NodeData.nodeID}");
+                        }
+                    });
+                }
             });
         }
 

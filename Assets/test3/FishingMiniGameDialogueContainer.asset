@@ -14,7 +14,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueContainer
   startNodeID: Node_d46da
   allNodes:
-  - graphPosition: {x: 100, y: 100}
+  - graphPosition: {x: 420, y: 100}
+    nextNodeID: Node_7c912
+    nodeID: Node_1f273
+    speakerName: "\u91E3\u308A\u4EBA"
+    dialogueText: "\u3088\u3057\u59CB\u3081\u3088\u3046!!"
+    choices: []
+  - graphPosition: {x: 420, y: 320}
+    nextNodeID: Node_cd479
+    nodeID: Node_b13a3
+    speakerName: "\u91E3\u308A\u4EBA"
+    dialogueText: "\u305D\u3063\u304B\u3058\u3083\u3042\u306D"
+    choices: []
+  - graphPosition: {x: 740, y: 320}
+    nextNodeID: 
+    nodeID: Node_cd479
+    speakerName: "\u91E3\u308A\u4EBA"
+    dialogueText: '[end_dialogue:fade=0.5]'
+    choices: []
+  - graphPosition: {x: 740, y: 100}
+    nextNodeID: 
+    nodeID: Node_7c912
+    speakerName: 
+    dialogueText: '[call:mode=nearest,script=SceneLoader,method=LoadScene,arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]'
+    choices: []
+  - graphPosition: {x: -127, y: 100}
     nextNodeID: 
     nodeID: Node_d46da
     speakerName: "\u91E3\u308A\u4EBA"
@@ -22,37 +46,13 @@ MonoBehaviour:
     choices:
     - choiceText: "\u3059\u308B!!"
       targetNodeID: Node_1f273
-      branchType: DefaultChoiceHandler
+      branchType: KeyNavBranchHandler
       conditionKey: 
       conditionOperator: 0
       conditionValue: 0
     - choiceText: "\u3057\u306A\u3044"
       targetNodeID: Node_b13a3
-      branchType: DefaultChoiceHandler
+      branchType: KeyNavBranchHandler
       conditionKey: 
       conditionOperator: 0
       conditionValue: 0
-  - graphPosition: {x: 708, y: 100}
-    nextNodeID: Node_7c912
-    nodeID: Node_1f273
-    speakerName: "\u91E3\u308A\u4EBA"
-    dialogueText: "\u3088\u3057\u59CB\u3081\u3088\u3046!!"
-    choices: []
-  - graphPosition: {x: 708, y: 285}
-    nextNodeID: Node_cd479
-    nodeID: Node_b13a3
-    speakerName: "\u91E3\u308A\u4EBA"
-    dialogueText: "\u305D\u3063\u304B\u3058\u3083\u3042\u306D"
-    choices: []
-  - graphPosition: {x: 975, y: 285}
-    nextNodeID: 
-    nodeID: Node_cd479
-    speakerName: "\u91E3\u308A\u4EBA"
-    dialogueText: '[end_dialogue:fade=0.5]'
-    choices: []
-  - graphPosition: {x: 975, y: 100}
-    nextNodeID: 
-    nodeID: Node_7c912
-    speakerName: 
-    dialogueText: '[call:mode=nearest,script=SceneLoader,method=LoadScene,arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]'
-    choices: []

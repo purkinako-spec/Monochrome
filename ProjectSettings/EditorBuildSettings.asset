@@ -18,6 +18,7 @@ EditorBuildSettings:
     path: Assets/Minigame1/Scenes/FishingMinigameSceneTest2.unity
     guid: b50851fc91cd592439abfb6f5e7159ee
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 1a5a8742efbe2df4ea4b16552a83ef34, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: b59dde4853c589849923dc13662e6442, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 0ca84dc6bb1f538499fc5c997a41190d, type: 3}
   m_UseUCBPForAssetBundles: 0

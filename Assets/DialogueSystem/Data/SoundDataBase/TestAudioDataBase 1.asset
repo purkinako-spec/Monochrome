@@ -42,7 +42,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 67934f65b214fbf41b59778906794417, type: 3}
   - key: choice_select
     type: 1
-    clip: {fileID: 8300000, guid: fcfd3fd0079ee5b42b49365783124666, type: 3}
+    clip: {fileID: 8300000, guid: 58a4598fd1a61dd4e8b7984cdf02121c, type: 3}
   - key: next_page
     type: 1
     clip: {fileID: 8300000, guid: 822c764ce99b20f44993b95f19fb4165, type: 3}

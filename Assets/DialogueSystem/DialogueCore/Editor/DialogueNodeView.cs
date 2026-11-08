@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
+using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using Runtime.Dialogue.Core;
 using Runtime.Dialogue.Branching;
-
 
 namespace DialogueSystem.Editor
 {
@@ -17,6 +17,11 @@ namespace DialogueSystem.Editor
         public DialogueNode nodeData;
         public Port inputPort;
         public Port nextPort;
+
+        private TextField dialogueTextField;
+        private Label previewLabel;
+        private bool isPreviewingTranslation = false;
+        private Color defaultBorderColor;
 
         public DialogueNodeView(DialogueNode nodeData)
         {
@@ -37,6 +42,9 @@ namespace DialogueSystem.Editor
             RefreshExpandedState();
             RefreshPorts();
             UpdateNextPortVisibility();
+
+            // デフォルトのボーダー色を退避
+            defaultBorderColor = style.borderTopColor.value;
         }
 
         private void CreateInputPort()
@@ -72,15 +80,36 @@ namespace DialogueSystem.Editor
             PreventInterference(speakerField);
             extensionContainer.Add(speakerField);
 
-            // 本文
-            var dialogueTextField = new TextField("Dialogue Text")
+            // 本文（自動折り返し・複数行対応）
+            dialogueTextField = new TextField("Dialogue Text")
             {
                 value = nodeData.dialogueText,
                 multiline = true
             };
-            dialogueTextField.RegisterValueChangedCallback(evt => nodeData.dialogueText = evt.newValue);
+            dialogueTextField.style.whiteSpace = WhiteSpace.Normal;
+            dialogueTextField.style.maxWidth = 240;
+            dialogueTextField.RegisterValueChangedCallback(evt =>
+            {
+                if (!isPreviewingTranslation)
+                {
+                    nodeData.dialogueText = evt.newValue;
+                }
+            });
             PreventInterference(dialogueTextField);
             extensionContainer.Add(dialogueTextField);
+
+            // 多言語プレビュー用インフォラベル（必要時表示）
+            previewLabel = new Label();
+            previewLabel.style.whiteSpace = WhiteSpace.Normal;
+            previewLabel.style.color = new Color(0.4f, 0.85f, 1f); // 爽やかな水色
+            previewLabel.style.fontSize = 11;
+            previewLabel.style.paddingLeft = 4;
+            previewLabel.style.paddingRight = 4;
+            previewLabel.style.paddingTop = 2;
+            previewLabel.style.paddingBottom = 2;
+            previewLabel.style.backgroundColor = new Color(0.1f, 0.2f, 0.3f, 0.5f);
+            previewLabel.style.display = DisplayStyle.None;
+            extensionContainer.Add(previewLabel);
 
             // 選択肢追加ボタン
             var addChoiceButton = new Button(() =>
@@ -100,6 +129,67 @@ namespace DialogueSystem.Editor
             })
             { text = "Add Choice" };
             extensionContainer.Add(addChoiceButton);
+        }
+
+        /// <summary>
+        /// 再生中ハイライトのON/OFF
+        /// </summary>
+        public void SetPlayingHighlight(bool isPlaying)
+        {
+            if (isPlaying)
+            {
+                style.borderTopColor = new Color(1f, 0.85f, 0.2f); // 鮮やかな黄色
+                style.borderBottomColor = new Color(1f, 0.85f, 0.2f);
+                style.borderLeftColor = new Color(1f, 0.85f, 0.2f);
+                style.borderRightColor = new Color(1f, 0.85f, 0.2f);
+                style.borderTopWidth = 3f;
+                style.borderBottomWidth = 3f;
+                style.borderLeftWidth = 3f;
+                style.borderRightWidth = 3f;
+            }
+            else
+            {
+                style.borderTopColor = defaultBorderColor;
+                style.borderBottomColor = defaultBorderColor;
+                style.borderLeftColor = defaultBorderColor;
+                style.borderRightColor = defaultBorderColor;
+                style.borderTopWidth = 1f;
+                style.borderBottomWidth = 1f;
+                style.borderLeftWidth = 1f;
+                style.borderRightWidth = 1f;
+            }
+        }
+
+        /// <summary>
+        /// 多言語プレビューテキストの反映
+        /// previewText が null または 空の場合は通常編集モードに戻る
+        /// </summary>
+        public void SetPreviewTranslation(string previewText)
+        {
+            if (string.IsNullOrEmpty(previewText))
+            {
+                isPreviewingTranslation = false;
+                if (dialogueTextField != null)
+                {
+                    dialogueTextField.value = nodeData.dialogueText;
+                    dialogueTextField.SetEnabled(true);
+                }
+                if (previewLabel != null) previewLabel.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                isPreviewingTranslation = true;
+                if (dialogueTextField != null)
+                {
+                    dialogueTextField.value = previewText;
+                    dialogueTextField.SetEnabled(false); // プレビュー中は直接編集不可にして原稿破壊を防ぐ
+                }
+                if (previewLabel != null)
+                {
+                    previewLabel.text = "🌐 Translated Preview (Read Only)";
+                    previewLabel.style.display = DisplayStyle.Flex;
+                }
+            }
         }
 
         private void CreateChoiceView(ChoiceData choice)
@@ -130,24 +220,20 @@ namespace DialogueSystem.Editor
             // IDialogueBranchHandlerを継承しているすべてのクラスを自動検知
             var handlerTypes = UnityEditor.TypeCache.GetTypesDerivedFrom<IDialogueBranchHandler>();
 
-            // 重複していた旧文字列（DefaultChoice, AutoBranch, SpecialUI）を排除し、実際のクラス名のみをリスト化
             List<string> branchOptions = new List<string>();
             foreach (var t in handlerTypes)
             {
                 if (!t.IsAbstract && !t.IsInterface && !branchOptions.Contains(t.Name))
                 {
-                    branchOptions.Add(t.Name); // ハンドラーのクラス名のみを追加 (DefaultChoiceHandler 等)
+                    branchOptions.Add(t.Name);
                 }
             }
 
-            // 旧データ（"DefaultChoice"等）が残っていた場合の移行互換サポート
             if (choice.branchType == "DefaultChoice") choice.branchType = "DefaultChoiceHandler";
             if (choice.branchType == "AutoBranch") choice.branchType = "AutoBranchHandler";
 
-            // リストが空だった場合のフォールバック
             if (branchOptions.Count == 0) branchOptions.Add("DefaultChoiceHandler");
 
-            // ドロップダウンフィールドを作成
             string currentValue = branchOptions.Contains(choice.branchType) ? choice.branchType : branchOptions[0];
             choice.branchType = currentValue;
 
@@ -239,7 +325,6 @@ namespace DialogueSystem.Editor
             }
         }
 
-        // 入力割り込み防止用共通メソッド
         private void PreventInterference(VisualElement element)
         {
             element.RegisterCallback<MouseDownEvent>(evt => evt.StopPropagation());

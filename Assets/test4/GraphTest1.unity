@@ -290,9 +290,21 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1057123303710048259, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: portraitSlots.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1057123303710048259, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: 'portraitDatabases.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: 2f320460f7be42b479c9af4ce7535b9d, type: 2}
+    - target: {fileID: 1057123303710048259, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: portraitSlots.Array.data[3].positionID
+      value: SpeakerIcon
+      objectReference: {fileID: 0}
+    - target: {fileID: 1057123303710048259, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: portraitSlots.Array.data[3].portraitImage
+      value: 
+      objectReference: {fileID: 1900458789}
     - target: {fileID: 1266691079118362658, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_SizeDelta.x
       value: -105
@@ -311,7 +323,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1506638916994045535, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 700
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 1506638916994045535, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_SizeDelta.y
@@ -333,6 +345,38 @@ PrefabInstance:
       propertyPath: m_BlockingObjects
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: uiParent
+      value: 
+      objectReference: {fileID: 601451934}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: normalTextColor.b
+      value: 0.5471698
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: normalTextColor.g
+      value: 0.5471698
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: normalTextColor.r
+      value: 0.5471698
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: selectedTextColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: selectedTextColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: selectedTextColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6113977625182445273, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: defaultFont
+      value: 
+      objectReference: {fileID: 11400000, guid: c58a72039d3491942a4feded40b89ea2, type: 2}
     - target: {fileID: 6901523451963831446, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_UiScaleMode
       value: 1
@@ -438,6 +482,10 @@ PrefabInstance:
     - target: {fileID: 8811312004833692160, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9067469486058250049, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 9067469486058250049, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_SizeDelta.y
@@ -817,6 +865,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1659479671}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!224 &601451934 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3183802275182441326, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+  m_PrefabInstance: {fileID: 257023926}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &756389569 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9188795208628092090, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
@@ -2130,6 +2183,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1900458789 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7538681201884390575, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+  m_PrefabInstance: {fileID: 257023926}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &2139656285
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueFontDatabase
   fontStyles:
   - styleName: default
-    font: {fileID: 11400000, guid: 2cff112cf2f3a1b4cb3327fc1ae3a972, type: 2}
+    font: {fileID: 11400000, guid: c58a72039d3491942a4feded40b89ea2, type: 2}
   - styleName: tegaki
     font: {fileID: 11400000, guid: c9cf12b0a9dacc64abb82763dd275784, type: 2}
   - styleName: asobi

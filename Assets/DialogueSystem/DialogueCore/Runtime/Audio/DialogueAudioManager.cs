@@ -4,12 +4,39 @@ using UnityEngine;
 
 namespace Runtime.Dialogue.Audio
 {
+    [AddComponentMenu("Dialogue/Core/Dialogue Audio Manager")]
+    [DisallowMultipleComponent]
     public class DialogueAudioManager : MonoBehaviour
     {
-        public static DialogueAudioManager Instance { get; private set; }
+        private static DialogueAudioManager instance;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            instance = null;
+        }
+
+        public static DialogueAudioManager Instance
+        {
+            get
+            {
+                if (instance == null || !instance)
+                {
+                    instance = FindFirstObjectByType<DialogueAudioManager>();
+                    if ((instance == null || !instance) && Application.isPlaying)
+                    {
+                        var go = new GameObject("[DialogueAudioManager]");
+                        instance = go.AddComponent<DialogueAudioManager>();
+                        if (go.transform.parent == null) DontDestroyOnLoad(go);
+                    }
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         [Header("Audio Databases")]
-        [Tooltip("g—p‚·‚éƒI[ƒfƒBƒIƒf[ƒ^ƒx[ƒX‚ÌƒŠƒXƒgiæ“ª‚Ì—v‘f‚Ù‚Ç—Dæ“I‚ÉŒŸõ‚³‚ê‚Ü‚·j")]
+        [Tooltip("ä½¿ç”¨ã™ã‚‹ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã®ãƒªã‚¹ãƒˆï¼ˆå…ˆé ­ã®è¦ç´ ã»ã©å„ªå…ˆçš„ã«æ¤œç´¢ã•ã‚Œã¾ã™ï¼‰")]
         [SerializeField] private List<DialogueAudioDatabase> audioDatabases = new List<DialogueAudioDatabase>();
 
         [Header("Audio Sources")]
@@ -20,21 +47,42 @@ namespace Runtime.Dialogue.Audio
 
         private void Awake()
         {
-            if (Instance == null) Instance = this;
-            else Destroy(gameObject);
+            if (instance == null || !instance)
+            {
+                instance = this;
+                if (transform.parent == null)
+                {
+                    DontDestroyOnLoad(gameObject);
+                }
+                EnsureAudioSources();
+            }
+            else if (instance != this)
+            {
+                Destroy(gameObject);
+            }
         }
 
-        // --- ƒf[ƒ^ƒx[ƒX‚Ì“®“I’Ç‰ÁEíœ‹@”\ ---
-        /// <summary>
-        /// ƒf[ƒ^ƒx[ƒX‚ğ’Ç‰Á‚µ‚Ü‚·iw’è‚ª‚ ‚ê‚Îæ“ª‚É‘}“ü‚µ‚Ä—DæŒŸõ‚Éİ’è‰Â”\j
-        /// </summary>
+        private void EnsureAudioSources()
+        {
+            if (bgmSource == null) bgmSource = gameObject.AddComponent<AudioSource>();
+            if (seSource == null) seSource = gameObject.AddComponent<AudioSource>();
+            if (voiceSource == null) voiceSource = gameObject.AddComponent<AudioSource>();
+            if (typingSource == null) typingSource = gameObject.AddComponent<AudioSource>();
+
+            bgmSource.playOnAwake = false;
+            seSource.playOnAwake = false;
+            voiceSource.playOnAwake = false;
+            typingSource.playOnAwake = false;
+        }
+
+        // --- ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã®å‹•çš„è¿½åŠ ãƒ»å‰Šé™¤æ©Ÿèƒ½ ---
         public void AddDatabase(DialogueAudioDatabase db, bool highPriority = false)
         {
             if (db == null || audioDatabases.Contains(db)) return;
 
             if (highPriority)
             {
-                audioDatabases.Insert(0, db); // ƒV[ƒ“ŒÅ—Lƒf[ƒ^‚È‚Ç‚ğ—Dæ‚µ‚½‚¢ê‡‚Íæ“ª‚É‘}“ü
+                audioDatabases.Insert(0, db);
             }
             else
             {
@@ -55,7 +103,7 @@ namespace Runtime.Dialogue.Audio
             audioDatabases.Clear();
         }
 
-        // --- ‰¹ºŒŸõƒƒWƒbƒN ---
+        // --- éŸ³å£°æ¤œç´¢ãƒ­ã‚¸ãƒƒã‚¯ ---
         private AudioClip FindAudioClip(string key, AudioType type)
         {
             foreach (var db in audioDatabases)
@@ -65,11 +113,11 @@ namespace Runtime.Dialogue.Audio
                 if (clip != null) return clip;
             }
 
-            Debug.LogWarning($"[DialogueAudioManager] ƒL[ '{key}' (í•Ê: {type}) ‚ÌAudioClip‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½B");
+            Debug.LogWarning($"[DialogueAudioManager] ã‚­ãƒ¼ '{key}' (ç¨®åˆ¥: {type}) ã®AudioClipãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸã€‚");
             return null;
         }
 
-        // --- Ä¶ˆ— ---
+        // --- å†ç”Ÿå‡¦ç† ---
         public void PlayBGM(string key, bool loop = true)
         {
             var clip = FindAudioClip(key, AudioType.BGM);
