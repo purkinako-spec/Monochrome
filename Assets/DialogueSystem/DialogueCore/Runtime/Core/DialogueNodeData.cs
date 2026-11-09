@@ -10,7 +10,8 @@ namespace Runtime.Dialogue.Core
         LessOrEqual,    // <=
         Equal,          // ==
         Greater,        // >
-        Less            // <
+        Less,           // <
+        NotEqual        // !=
     }
 
     [Serializable]

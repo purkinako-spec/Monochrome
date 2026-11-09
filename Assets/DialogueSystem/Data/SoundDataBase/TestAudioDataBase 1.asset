@@ -46,3 +46,6 @@ MonoBehaviour:
   - key: next_page
     type: 1
     clip: {fileID: 8300000, guid: 822c764ce99b20f44993b95f19fb4165, type: 3}
+  - key: cursor_move
+    type: 1
+    clip: {fileID: 8300000, guid: 822c764ce99b20f44993b95f19fb4165, type: 3}
