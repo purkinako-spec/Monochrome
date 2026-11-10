@@ -37,6 +37,38 @@ namespace Monochrome.Core.Character
                 LocalPlayer = this;
             }
             motor = GetComponent<CharacterMotor2D>();
+
+            // インスペクタ未割り当て時の自動フォールバック探索
+            if (moveAction == null || sprintAction == null)
+            {
+                AutoBindInputActions();
+            }
+        }
+
+        private void AutoBindInputActions()
+        {
+            var assets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
+            foreach (var asset in assets)
+            {
+                if (asset.name.Contains("InputSystem"))
+                {
+                    var map = asset.FindActionMap("Player");
+                    if (map != null)
+                    {
+                        if (moveAction == null)
+                        {
+                            var act = map.FindAction("Move");
+                            if (act != null) moveAction = InputActionReference.Create(act);
+                        }
+                        if (sprintAction == null)
+                        {
+                            var act = map.FindAction("Sprint");
+                            if (act != null) sprintAction = InputActionReference.Create(act);
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
         private void OnEnable()

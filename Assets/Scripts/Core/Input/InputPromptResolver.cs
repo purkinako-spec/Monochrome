@@ -14,10 +14,10 @@ namespace Monochrome.Core.Input
         private static readonly Dictionary<string, (string pc, string gamepad, string touch)> DefaultKeyBindings =
             new Dictionary<string, (string, string, string)>(StringComparer.OrdinalIgnoreCase)
             {
-                { "Interact", ("[E]", "(A)", "タップ") },
-                { "Talk",     ("[E]", "(A)", "タップ") },
-                { "Inspect",  ("[E]", "(A)", "タップ") },
-                { "Open",     ("[E]", "(A)", "タップ") },
+                { "Interact", ("[F]", "(A)", "タップ") },
+                { "Talk",     ("[F]", "(A)", "タップ") },
+                { "Inspect",  ("[F]", "(A)", "タップ") },
+                { "Open",     ("[F]", "(A)", "タップ") },
                 { "Submit",   ("[Enter]", "(A)", "決定") },
                 { "Cancel",   ("[Esc]", "(B)", "戻る") },
                 { "Jump",     ("[Space]", "(A)", "ジャンプ") },

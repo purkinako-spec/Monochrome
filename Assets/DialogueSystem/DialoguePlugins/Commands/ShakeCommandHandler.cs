@@ -50,7 +50,7 @@ namespace Runtime.Dialogue.Commands
             float time = command.GetFloat("time", 0.5f);
             string modeStr = command.GetString("mode", "pos").ToLower();
 
-            var view = UnityEngine.Object.FindObjectOfType<DialogueViewWindow>();
+            var view = UnityEngine.Object.FindFirstObjectByType<DialogueViewWindow>();
             if (view == null)
             {
                 Debug.LogWarning("[ShakeCommandHandler] DialogueViewWindow がシーンに見つかりません。");

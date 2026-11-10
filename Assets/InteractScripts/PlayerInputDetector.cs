@@ -95,7 +95,6 @@ public class PlayerInputDetector : MonoBehaviour
             if (!trigger.IsInteractorInside(gameObject)) continue;
 
             float dist = Vector2.Distance(centerPos, trigger.transform.position);
-            int priority = 0;
             // IInteractable から優先度を取得できればする (インターフェース拡張時用)
             // 今回は InteractableTrigger に Priority プロパティを持たせるか、距離のみで判定
             // ここでは距離のみ (スコア = -距離) で最近接を優先

@@ -102,6 +102,28 @@ namespace InteractionSystem2D
         /// </summary>
         private void SubscribeActions()
         {
+            // インスペクタ未設定時の自動フォールバック登録 (Player/Interact -> "Interact")
+            if (actionKeyMappings == null || actionKeyMappings.Count == 0)
+            {
+                var assets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
+                foreach (var asset in assets)
+                {
+                    if (asset.name.Contains("InputSystem"))
+                    {
+                        var act = asset.FindActionMap("Player")?.FindAction("Interact");
+                        if (act != null)
+                        {
+                            if (actionKeyMappings == null) actionKeyMappings = new List<ActionKeyMapping>();
+                            actionKeyMappings.Add(new ActionKeyMapping
+                            {
+                                actionReference = InputActionReference.Create(act),
+                                logicalKey = "Interact"
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
             if (actionKeyMappings == null || actionKeyMappings.Count == 0)
             {
                 Debug.LogWarning("[PlayerInteractor2D] ActionKeyMappings が設定されていません。インスペクタでアクションと論理キーの組み合わせを追加してください。", this);
@@ -168,10 +190,9 @@ namespace InteractionSystem2D
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (!useTriggerCollider) return;
-            if (other != _activeDetectionCollider) return;
             if (!IsInInteractableLayer(other.gameObject.layer)) return;
 
-            var interactable = other.GetComponent<IInteractable2D>();
+            var interactable = other.GetComponentInParent<IInteractable2D>();
             if (interactable != null && !_candidates.Contains(interactable))
             {
                 _candidates.Add(interactable);
@@ -182,9 +203,8 @@ namespace InteractionSystem2D
         private void OnTriggerExit2D(Collider2D other)
         {
             if (!useTriggerCollider) return;
-            if (other != _activeDetectionCollider) return;
 
-            var interactable = other.GetComponent<IInteractable2D>();
+            var interactable = other.GetComponentInParent<IInteractable2D>();
             if (interactable != null && _candidates.Contains(interactable))
             {
                 _candidates.Remove(interactable);

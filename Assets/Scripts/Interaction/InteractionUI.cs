@@ -21,7 +21,7 @@ namespace InteractionSystem
             
             if (_interactor == null)
             {
-                _interactor = FindObjectOfType<PlayerInteractor>();
+                _interactor = FindFirstObjectByType<PlayerInteractor>();
             }
 
             if (_interactor != null)

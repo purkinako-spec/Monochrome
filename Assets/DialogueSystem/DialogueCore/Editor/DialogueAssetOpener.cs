@@ -14,7 +14,7 @@ namespace DialogueSystem.Editor
         [OnOpenAsset(1)]
         public static bool OnOpenAsset(int instanceID, int line)
         {
-            var asset = EditorUtility.InstanceIDToObject(instanceID) as DialogueContainer;
+            var asset = EditorUtility.EntityIdToObject(instanceID) as DialogueContainer;
             if (asset != null)
             {
                 DialogueEditorWindow.OpenAndLoadContainer(asset);
