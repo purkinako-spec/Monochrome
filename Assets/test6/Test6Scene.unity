@@ -802,6 +802,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2057816325404785628, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: prefabMappings.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3167265506808265887, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_Color.a
       value: 0.8666667
@@ -814,6 +818,18 @@ PrefabInstance:
       propertyPath: uiParent
       value: 
       objectReference: {fileID: 987906249}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: repeatDelay
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: cursorObject
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: branchUIPrefab
+      value: 
+      objectReference: {fileID: 7961670325720567414, guid: 338b2a1da3b40b849921966991531423, type: 3}
     - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: normalTextColor.b
       value: 0.5471698
@@ -1268,7 +1284,6 @@ GameObject:
   - component: {fileID: 1372264799}
   - component: {fileID: 1372264789}
   - component: {fileID: 1372264788}
-  - component: {fileID: 1372264787}
   - component: {fileID: 1372264786}
   m_Layer: 0
   m_Name: Player
@@ -1314,36 +1329,6 @@ MonoBehaviour:
   - actionReference: {fileID: 1781555164194001046, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
     logicalKey: Interact
   showDebugGizmos: 1
---- !u!114 &1372264787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1372264784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: -944628639613478452, guid: 0ca84dc6bb1f538499fc5c997a41190d, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: FishMiniGameActionMaps
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 1796688875}
 --- !u!61 &1372264788
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1555,11 +1540,11 @@ GameObject:
   - component: {fileID: 1573472087}
   - component: {fileID: 1573472086}
   - component: {fileID: 1573472085}
-  - component: {fileID: 1573472084}
+  - component: {fileID: 1573472088}
   - component: {fileID: 1573472083}
   - component: {fileID: 1573472082}
   m_Layer: 6
-  m_Name: image_1
+  m_Name: NPC_Villager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1589,10 +1574,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1573472080}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49fd26df26f5cbd4c9490d04acab6d4c, type: 3}
+  m_Script: {fileID: 11500000, guid: 09ada9d3efaadbf4c93aeb565abfcba2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MiniGame.Fish.Test2.SceneLoader
-  sceneName: FishingMinigameSceneTest1
+  m_EditorClassIdentifier: Monochrome.Core.Character::CharacterMotor2D
+  walkSpeed: 2.0
+  runSpeed: 3.5
+  sneakSpeed: 1.2
+  initialFacing: {x: 0, y: -1}
+  animator: {fileID: 0}
 --- !u!114 &1573472083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1602,27 +1591,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1573472080}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00d1954df7c679048910692fc6eb2cfc, type: 3}
+  m_Script: {fileID: 11500000, guid: f028539a48f041fc834d6349f8a5f70b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractionSystem2D.InteractableObject2DNPC
-  requiredKey: intearct
-  interactPrompt: "[F] \u8ABF\u3079\u308B"
-  isInteractable: 1
-  _collider: {fileID: 1573472086}
---- !u!114 &1573472084
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1573472080}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d607ca9170f60174f98a98bf995a4566, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueStarter
-  dialogueData: {fileID: 11400000, guid: a1e7e3e067cd4e0459d2356ba3751671, type: 2}
-  dialogueView: {fileID: 987906252}
+  m_EditorClassIdentifier: Monochrome.Core.Dialogue::DialogueSelector
+  npcId: npc_villager
+  dialogueBranches: []
+  defaultContainerName: 
+  defaultDirectContainer: {fileID: 11400000, guid: ff239a594aa0b5342b7507d16b6b0097, type: 2}
+  requiredKey: Interact
+  talkActionDescription: "話す"
+  autoIncrementTalkCount: 1
 --- !u!58 &1573472085
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -2316,6 +2294,241 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!50 &1573472088
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573472080}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!1 &100000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100000002}
+  - component: {fileID: 100000003}
+  m_Layer: 0
+  m_Name: SpawnPoint_Default
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.095, y: -1.544, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db3075193e7eb2d41809963aadcfd7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Monochrome.Core.Transition::SpawnPoint
+  spawnId: Default
+  facingDirection: {x: 0, y: -1}
+  gizmoColor: {r: 0.2, g: 0.8, b: 1, a: 0.8}
+  gizmoRadius: 0.4
+--- !u!1 &100000011
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100000012}
+  - component: {fileID: 100000013}
+  - component: {fileID: 100000014}
+  m_Layer: 6
+  m_Name: Door_Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100000012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000011}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.5, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &100000013
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000011}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 2}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 2}
+  m_EdgeRadius: 0
+--- !u!114 &100000014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd93ddd31f76b6d458ca8822618297d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Monochrome.Core.Transition::AreaDoor2D
+  triggerType: 0
+  destinationScene: 
+  spawnPointId: Default
+  targetTransform: {fileID: 0}
+  activationMode: 0
+  requiredKey: Interact
+  promptActionDescription: "入る"
+  transitionStyle: 0
+  fadeDuration: 0.4
+  requiredFlagKey: 
+  requiredFlagValue: 1
+  lockedMessage: "鍵がかかっているようだ…"
+--- !u!1 &100000021
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100000022}
+  - component: {fileID: 100000023}
+  - component: {fileID: 100000024}
+  m_Layer: 0
+  m_Name: DialogueCommandExtensions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100000022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000021}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100000023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad6ab399f2a75af42b7e467539ea47f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Monochrome.Core.Character::CutsceneCommandHandlers
+--- !u!114 &100000024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e12688fc777f6a442968d1136427d784, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Monochrome.Core.Transition::TransitionCommandHandler
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2327,3 +2540,6 @@ SceneRoots:
   - {fileID: 1228362870}
   - {fileID: 1643883656}
   - {fileID: 987906248}
+  - {fileID: 100000002}
+  - {fileID: 100000012}
+  - {fileID: 100000022}

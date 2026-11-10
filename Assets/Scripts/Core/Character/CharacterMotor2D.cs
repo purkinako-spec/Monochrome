@@ -79,7 +79,7 @@ namespace Monochrome.Core.Character
 
         private void ApplyMovement()
         {
-            if (rb == null) return;
+            if (rb == null || rb.bodyType == RigidbodyType2D.Static) return;
 
             if (movementInput.sqrMagnitude > 0.001f)
             {
