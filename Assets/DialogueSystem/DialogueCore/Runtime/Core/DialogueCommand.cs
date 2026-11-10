@@ -17,7 +17,6 @@ namespace Runtime.Dialogue
             IsExecuted = false;
         }
 
-        // --- 追加：パラメータを安全に取り出すための便利メソッド ---
         public string GetString(string key, string defaultValue = "")
         {
             return Arguments.TryGetValue(key, out string val) ? val : defaultValue;
@@ -32,6 +31,17 @@ namespace Runtime.Dialogue
         public int GetInt(string key, int defaultValue = 0)
         {
             if (Arguments.TryGetValue(key, out string val) && int.TryParse(val, out int result)) return result;
+            return defaultValue;
+        }
+
+        public bool GetBool(string key, bool defaultValue = false)
+        {
+            if (Arguments.TryGetValue(key, out string val))
+            {
+                if (bool.TryParse(val, out bool b)) return b;
+                if (val == "1") return true;
+                if (val == "0") return false;
+            }
             return defaultValue;
         }
     }

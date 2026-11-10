@@ -1,3 +1,4 @@
+using Monochrome.Core.Character;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -32,6 +33,11 @@ namespace InteractionSystem2D
 
         [Header("デバッグ")]
         [SerializeField] private bool showDebugGizmos = true;
+
+        /// <summary>
+        /// インタラクト対象が切り替わったときに発火するイベント (currentTarget)
+        /// </summary>
+        public event System.Action<IInteractable2D> OnTargetChanged;
 
         // 内部状態
         private readonly List<IInteractable2D> _candidates = new List<IInteractable2D>();
@@ -191,6 +197,13 @@ namespace InteractionSystem2D
         /// </summary>
         private void OnActionPerformed(InputAction.CallbackContext context)
         {
+            // 操作がブロックされている（会話中・エリア移動中・メニュー中など）場合は無視
+            if (PlayerController2D.LocalPlayer != null &&
+                !PlayerController2D.LocalPlayer.BlockState.CanInteract)
+            {
+                return;
+            }
+
             if (_currentTarget == null) return;
 
             // 実行されたアクションに対応する論理キーを取得
@@ -234,7 +247,11 @@ namespace InteractionSystem2D
                 }
             }
 
-            _currentTarget = nearest;
+            if (_currentTarget != nearest)
+            {
+                _currentTarget = nearest;
+                OnTargetChanged?.Invoke(_currentTarget);
+            }
         }
 
         private bool IsInInteractableLayer(int layer)
