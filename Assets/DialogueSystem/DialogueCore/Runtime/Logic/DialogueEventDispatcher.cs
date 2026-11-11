@@ -1,29 +1,61 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Runtime.Dialogue.Core; // IDialogueCommandHandler ‚ª‚ ‚é–¼‘O‹óŠÔ‚ğw’è
-// using Runtime.Dialogue.Commands; // ¦ŠÂ‹«‚É‚æ‚Á‚Ä‚Í‚±‚¿‚ç‚à•K—v
+using Runtime.Dialogue.Core;
 
 namespace Runtime.Dialogue
 {
     /// <summary>
-    /// ŠeƒRƒ}ƒ“ƒh‚ÌÀs‚ğA“o˜^‚³‚ê‚½ƒnƒ“ƒhƒ‰[‚ÉŠÛ“Š‚°‚·‚éƒfƒBƒXƒpƒbƒ`ƒƒ
+    /// å„ã‚³ãƒãƒ³ãƒ‰ã®å®Ÿè¡Œã‚’ã€ç™»éŒ²ã•ã‚ŒãŸãƒãƒ³ãƒ‰ãƒ©ãƒ¼ã«ä¸¸æŠ•ã’ã™ã‚‹ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒãƒ£ã€‚
+    /// - ã‚·ãƒ¼ãƒ³ä¸Šã®æ—¢å­˜ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ã®è‡ªå‹•ã‚¹ã‚­ãƒ£ãƒ³
+    /// - å¤–éƒ¨ã‹ã‚‰ã® RegisterHandler ã«ã‚ˆã‚‹å‹•çš„ç™»éŒ²
+    /// - æœªç™»éŒ²ã‚³ãƒãƒ³ãƒ‰åˆ°æ¥æ™‚ã®è‡ªå‹•å‹æ¢ç´¢ãƒ»è‡ªå‹•ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹åŒ–ï¼ˆãƒ•ã‚©ãƒ¼ãƒ«ãƒãƒƒã‚¯ï¼‰
+    /// ã‚’å‚™ãˆã€ã‚³ãƒãƒ³ãƒ‰ãŒæœªç™»éŒ²ã®ã¾ã¾å–ã‚Šã“ã¼ã•ã‚Œã‚‹ã®ã‚’é˜²ãã¾ã™ã€‚
     /// </summary>
     public class DialogueEventDispatcher : MonoBehaviour
     {
         public static DialogueEventDispatcher Instance { get; private set; }
 
-        // ƒRƒ}ƒ“ƒh–¼‚ÆA‚»‚ê‚ğˆ—‚·‚éƒNƒ‰ƒX(ƒnƒ“ƒhƒ‰[)‚Ì«‘
-        private Dictionary<string, IDialogueCommandHandler> handlers = new Dictionary<string, IDialogueCommandHandler>();
+        // ã‚³ãƒãƒ³ãƒ‰åã¨ã€ãã‚Œã‚’å‡¦ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹(ãƒãƒ³ãƒ‰ãƒ©ãƒ¼)ã®è¾æ›¸
+        private Dictionary<string, IDialogueCommandHandler> handlers = new Dictionary<string, IDialogueCommandHandler>(StringComparer.OrdinalIgnoreCase);
 
         private void Awake()
         {
-            if (Instance == null) { Instance = this; }
-            else { Destroy(gameObject); }
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            ScanAndRegisterSceneHandlers();
+        }
+
+        private void Start()
+        {
+            ScanAndRegisterSceneHandlers();
         }
 
         /// <summary>
-        /// ŠO•”‚ÌƒXƒNƒŠƒvƒg‚©‚çV‚µ‚¢‰‰oƒRƒ}ƒ“ƒh‚ğƒVƒXƒeƒ€‚É“o˜^‚·‚é
+        /// ã‚·ãƒ¼ãƒ³ä¸Šã«å­˜åœ¨ã™ã‚‹ã™ã¹ã¦ã® IDialogueCommandHandler ã‚’è‡ªå‹•æ¤œå‡ºã—ã¦ç™»éŒ²ã—ã¾ã™
+        /// </summary>
+        public void ScanAndRegisterSceneHandlers()
+        {
+            var allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            foreach (var mb in allMonoBehaviours)
+            {
+                if (mb is IDialogueCommandHandler handler)
+                {
+                    RegisterHandler(handler);
+                }
+            }
+        }
+
+        /// <summary>
+        /// å¤–éƒ¨ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰æ–°ã—ã„æ¼”å‡ºã‚³ãƒãƒ³ãƒ‰ã‚’ã‚·ã‚¹ãƒ†ãƒ ã«ç™»éŒ²ã™ã‚‹
         /// </summary>
         public void RegisterHandler(IDialogueCommandHandler handler)
         {
@@ -33,6 +65,7 @@ namespace Runtime.Dialogue
             if (!handlers.ContainsKey(key))
             {
                 handlers.Add(key, handler);
+                Debug.Log($"[DialogueEventDispatcher] ã‚³ãƒãƒ³ãƒ‰ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ç™»éŒ²: '{key}' -> {handler.GetType().Name}");
             }
         }
 
@@ -44,10 +77,9 @@ namespace Runtime.Dialogue
                 return;
             }
 
-            // yC³zC#‚Ì³‚µ‚¢Nullƒ`ƒFƒbƒN\•¶
             string key = command.CommandName?.ToLower() ?? string.Empty;
 
-            if (handlers.TryGetValue(key, out var handler))
+            if (EnsureHandlerRegistered(key, out var handler))
             {
                 handler.Execute(command, () =>
                 {
@@ -57,7 +89,7 @@ namespace Runtime.Dialogue
             }
             else
             {
-                Debug.LogWarning($"[Dialogue] –¢“o˜^‚ÌƒRƒ}ƒ“ƒh '{key}' ‚ª—ˆ‚Ü‚µ‚½B");
+                Debug.LogWarning($"[Dialogue] æœªç™»éŒ²ã®ã‚³ãƒãƒ³ãƒ‰ '{key}' ãŒæ¥ã¾ã—ãŸã€‚");
                 command.IsExecuted = true;
                 onComplete?.Invoke();
             }
@@ -68,12 +100,85 @@ namespace Runtime.Dialogue
             if (command == null || command.IsExecuted) return;
             command.IsExecuted = true;
 
-            // yC³zC#‚Ì³‚µ‚¢Nullƒ`ƒFƒbƒN\•¶
             string key = command.CommandName?.ToLower() ?? string.Empty;
 
-            if (handlers.TryGetValue(key, out var handler))
+            if (EnsureHandlerRegistered(key, out var handler))
             {
                 handler.ForceComplete(command);
+            }
+        }
+
+        /// <summary>
+        /// ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ãŒæœªç™»éŒ²ã®å ´åˆã€ã‚·ãƒ¼ãƒ³èµ°æŸ»ãŠã‚ˆã³ã‚¢ã‚»ãƒ³ãƒ–ãƒªæ¢ç´¢ã‚’è¡Œã£ã¦ç¢ºå®Ÿã«è§£æ±ºã—ã¾ã™
+        /// </summary>
+        private bool EnsureHandlerRegistered(string key, out IDialogueCommandHandler handler)
+        {
+            if (handlers.TryGetValue(key, out handler) && handler != null)
+            {
+                return true;
+            }
+
+            // 1. ã‚·ãƒ¼ãƒ³å…¨ä½“ã‚’å†èµ°æŸ»
+            ScanAndRegisterSceneHandlers();
+            if (handlers.TryGetValue(key, out handler) && handler != null)
+            {
+                return true;
+            }
+
+            // 2. ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã‚¢ã‚»ãƒ³ãƒ–ãƒªã‹ã‚‰æœªé…ç½®ã®ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ã‚’è‡ªå‹•æ¤œå‡ºãƒ»ã‚¢ã‚¿ãƒƒãƒ
+            AutoDiscoverAndAttachHandler(key);
+            if (handlers.TryGetValue(key, out handler) && handler != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void AutoDiscoverAndAttachHandler(string commandKey)
+        {
+            try
+            {
+                var targetInterface = typeof(IDialogueCommandHandler);
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+                foreach (var assembly in assemblies)
+                {
+                    string asmName = assembly.GetName().Name;
+                    if (asmName.StartsWith("System") || asmName.StartsWith("UnityEngine") || asmName.StartsWith("UnityEditor") || asmName.StartsWith("mscorlib"))
+                        continue;
+
+                    Type[] types;
+                    try { types = assembly.GetTypes(); }
+                    catch { continue; }
+
+                    foreach (var type in types)
+                    {
+                        if (targetInterface.IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract && typeof(MonoBehaviour).IsAssignableFrom(type))
+                        {
+                            // æ—¢ã«ã‚¢ã‚¿ãƒƒãƒæ¸ˆã¿ã‹ç¢ºèª
+                            var existing = GetComponent(type) as IDialogueCommandHandler;
+                            if (existing == null)
+                            {
+                                existing = gameObject.AddComponent(type) as IDialogueCommandHandler;
+                            }
+
+                            if (existing != null)
+                            {
+                                RegisterHandler(existing);
+                                if (existing.TargetCommandName.Equals(commandKey, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Debug.Log($"[DialogueEventDispatcher] ã‚³ãƒãƒ³ãƒ‰ '{commandKey}' ã«å¯¾å¿œã™ã‚‹ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ '{type.Name}' ã‚’è‡ªå‹•ã‚¢ã‚¿ãƒƒãƒï¼†ç™»éŒ²ã—ã¾ã—ãŸã€‚");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[DialogueEventDispatcher] ã‚³ãƒãƒ³ãƒ‰è‡ªå‹•è§£æ±ºä¸­ã«ä¾‹å¤–: {ex.Message}");
             }
         }
     }

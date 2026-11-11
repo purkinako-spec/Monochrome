@@ -36,7 +36,7 @@ MonoBehaviour:
     nextNodeID: 
     nodeID: Node_7c912
     speakerName: 
-    dialogueText: '[call:mode=nearest,script=SceneLoader,method=LoadScene,arg=FishingMinigameSceneTest2][end_dialogue:fade=0.5]'
+    dialogueText: '[minigame:scene=FishingMinigameSceneTest2,flag=minigame_fishing_cleared,fade=true][end_dialogue:fade=0.5]'
     choices: []
   - graphPosition: {x: -127, y: 100}
     nextNodeID: 
