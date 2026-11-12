@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using Runtime.Dialogue.Core;
 using Runtime.Dialogue.Logic;
 using Runtime.Dialogue.Audio;
-using Runtime.Dialogue.UI;
 
 namespace Runtime.Dialogue
 {
@@ -19,10 +18,6 @@ namespace Runtime.Dialogue
         [SerializeField] private TextMeshProUGUI bodyText;
         [SerializeField] private Transform choiceButtonParent;
         [SerializeField] private Button choiceButtonPrefab;
-
-        [Header("Choice Panel Settings")]
-        [Tooltip("選択肢パネルのPrefab（例: UIButtonPanel, 2PatternButtonPanel）。設定されている場合はこちらを使ってスクロール/ウィンドウ送り形式で表示します。")]
-        [SerializeField] private GameObject choicePanelPrefab;
 
         [Header("Audio Component")]
         [SerializeField] private DialogueTypewriterAudio typewriterAudio;
@@ -43,7 +38,6 @@ namespace Runtime.Dialogue
         private List<DialogueCommand> currentCommands;
         private Action onCompleteCallback;
         private List<Button> activeButtons = new List<Button>();
-        private DialogueChoicePanel activeChoicePanel;
 
         public bool IsTyping => typingCoroutine != null;
         public bool IsShowingChoices { get; private set; } = false;
@@ -281,73 +275,26 @@ namespace Runtime.Dialogue
             HideChoices();
             IsShowingChoices = true;
 
-            // 1. choicePanelPrefab が指定されている場合
-            if (choicePanelPrefab != null)
+            for (int i = 0; i < choices.Count; ++i)
             {
-                var panelObj = Instantiate(choicePanelPrefab, choiceButtonParent != null ? choiceButtonParent : transform);
-                activeChoicePanel = panelObj.GetComponent<DialogueChoicePanel>();
-                if (activeChoicePanel == null)
+                int index = i;
+                Button btn = Instantiate(choiceButtonPrefab, choiceButtonParent);
+
+                var btnText = btn.GetComponentInChildren<TextMeshProUGUI>();
+                if (btnText != null) btnText.text = choices[i].choiceText;
+
+                btn.onClick.AddListener(() =>
                 {
-                    activeChoicePanel = panelObj.AddComponent<DialogueChoicePanel>();
-                }
-                activeChoicePanel.Setup(choices, (index) =>
-                {
+                    DialogueAudioManager.Instance?.PlaySE("choice_select");
                     onChoiceSelected?.Invoke(index);
                 });
-                return;
-            }
-
-            // 2. 既存の choiceButtonParent 配下に DialogueChoicePanel がある場合
-            if (choiceButtonParent != null)
-            {
-                var existingPanel = choiceButtonParent.GetComponentInChildren<DialogueChoicePanel>(true);
-                if (existingPanel != null)
-                {
-                    activeChoicePanel = existingPanel;
-                    activeChoicePanel.Setup(choices, (index) =>
-                    {
-                        onChoiceSelected?.Invoke(index);
-                    });
-                    return;
-                }
-            }
-
-            // 3. フォールバック: 従来の単一ボタン生成方式
-            if (choiceButtonPrefab != null && choiceButtonParent != null)
-            {
-                for (int i = 0; i < choices.Count; ++i)
-                {
-                    int index = i;
-                    Button btn = Instantiate(choiceButtonPrefab, choiceButtonParent);
-
-                    var btnText = btn.GetComponentInChildren<TextMeshProUGUI>();
-                    if (btnText != null) btnText.text = choices[i].choiceText;
-
-                    btn.onClick.AddListener(() =>
-                    {
-                        DialogueAudioManager.Instance?.PlaySE("choice_select");
-                        onChoiceSelected?.Invoke(index);
-                    });
-                    activeButtons.Add(btn);
-                }
+                activeButtons.Add(btn);
             }
         }
 
         public void HideChoices()
         {
             IsShowingChoices = false;
-
-            if (activeChoicePanel != null)
-            {
-                activeChoicePanel.gameObject.SetActive(false);
-                // 動的生成されたパネルなら破棄
-                if (choicePanelPrefab != null && activeChoicePanel.gameObject != choicePanelPrefab)
-                {
-                    Destroy(activeChoicePanel.gameObject);
-                }
-                activeChoicePanel = null;
-            }
-
             foreach (var btn in activeButtons)
             {
                 if (btn != null) Destroy(btn.gameObject);

@@ -46,13 +46,13 @@ MonoBehaviour:
     choices:
     - choiceText: "\u3059\u308B!!"
       targetNodeID: Node_1f273
-      branchType: KeyNavBranchHandler
+      branchType: ScrollChoiceHandler
       conditionKey: 
       conditionOperator: 0
       conditionValue: 0
     - choiceText: "\u3057\u306A\u3044"
       targetNodeID: Node_b13a3
-      branchType: KeyNavBranchHandler
+      branchType: ScrollChoiceHandler
       conditionKey: 
       conditionOperator: 0
       conditionValue: 0

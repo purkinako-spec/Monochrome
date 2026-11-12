@@ -2810,7 +2810,6 @@ MonoBehaviour:
   bodyText: {fileID: 7458336110336151927}
   choiceButtonParent: {fileID: 1506638916994045535}
   choiceButtonPrefab: {fileID: 287873248718608711, guid: 74780f2f7ab01ff4996581e992de564e, type: 3}
-  choicePanelPrefab: {fileID: 7961670325720567414, guid: 95b5cc79649d05a45afa261aebea92b9, type: 3}
   typewriterAudio: {fileID: 6898096912201963555}
   typingSpeed: 0.05
   defaultFont: {fileID: 11400000, guid: efc93d5a0d9bae44397cc795954f0b92, type: 2}
