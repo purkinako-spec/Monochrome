@@ -1096,9 +1096,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: normalSprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 1b5154ffba2fd8a49aaf63857248eb5b, type: 3}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: branchUIPrefab
       value: 
       objectReference: {fileID: 7961670325720567414, guid: 338b2a1da3b40b849921966991531423, type: 3}
+    - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: selectedSprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 1b5154ffba2fd8a49aaf63857248eb5b, type: 3}
     - target: {fileID: 6061078495363347770, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: normalTextColor.b
       value: 0.5471698
