@@ -21,16 +21,23 @@ namespace Monochrome.Core.Input
     {
         private static InputDeviceManager instance;
 
+        // アプリ終了中フラグ：シーン閉鎖時に Instance ゲッターが新規 GO を生成しないようにする
+        private static bool isQuitting = false;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
         {
             instance = null;
+            isQuitting = false;
         }
 
         public static InputDeviceManager Instance
         {
             get
             {
+                // 終了中は新規生成しない（シーン閉鎖時の "not cleaned up" 警告を防ぐ）
+                if (isQuitting) return null;
+
                 if (instance == null || !instance)
                 {
                     instance = FindFirstObjectByType<InputDeviceManager>();
@@ -79,6 +86,16 @@ namespace Monochrome.Core.Input
         private void OnDisable()
         {
             InputSystem.onActionChange -= HandleActionChange;
+        }
+
+        private void OnApplicationQuit()
+        {
+            isQuitting = true;
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this) isQuitting = true;
         }
 
         private void DetectInitialDevice()
