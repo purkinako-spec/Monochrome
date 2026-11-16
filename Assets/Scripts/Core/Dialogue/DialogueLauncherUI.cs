@@ -1085,6 +1085,27 @@ namespace Monochrome.Core.Dialogue
         private void UpdatePromptText()
         {
             if (launcherButtonText == null) return;
+
+#if ENABLE_INPUT_SYSTEM
+            // openAction が Inspector 等で設定されている場合、その割り当てキー（例: [T], [Tab] 等）を優先表示
+            if (openAction != null && openAction.action != null)
+            {
+                var currentDevice = InputDeviceManager.Instance != null ? InputDeviceManager.Instance.CurrentDeviceType : InputDeviceType.KeyboardMouse;
+                if (currentDevice == InputDeviceType.Touchscreen)
+                {
+                    launcherButtonText.text = actionDescription;
+                    return;
+                }
+
+                string bindingStr = openAction.action.GetBindingDisplayString();
+                if (!string.IsNullOrEmpty(bindingStr))
+                {
+                    launcherButtonText.text = $"[{bindingStr}] {actionDescription}";
+                    return;
+                }
+            }
+#endif
+
             launcherButtonText.text = InputPromptResolver.GetPromptText(logicalKey, actionDescription);
         }
 
@@ -1316,16 +1337,15 @@ namespace Monochrome.Core.Dialogue
                     }
                 }
 
-                // Player マップから "Interact" または logicalKey と同名のアクションを検索
-                // InputPromptResolver の論理キー定義と同じ名前で管理できる
+                // Player マップから logicalKey と同名のアクション（未設定時は検索）
                 var playerMap = asset.FindActionMap("Player");
                 if (playerMap != null)
                 {
-                    if (openAction == null)
+                    if (openAction == null && !string.IsNullOrEmpty(logicalKey))
                     {
-                        // logicalKey（例: "Talk", "Interact"）と一致するアクションを優先検索
-                        var a = playerMap.FindAction(logicalKey)
-                             ?? playerMap.FindAction("Interact");
+                        // logicalKey（例: "Talk" 等）と一致するアクションのみ検索
+                        // ※ 勝手に "Interact" を割り当てて通常インタラクトと誤爆するのを防止
+                        var a = playerMap.FindAction(logicalKey);
                         if (a != null) openAction = InputActionReference.Create(a);
                     }
                 }
@@ -1363,26 +1383,15 @@ namespace Monochrome.Core.Dialogue
         private bool CheckOpenInput()
         {
 #if ENABLE_INPUT_SYSTEM
-            // ① InputActionReference が設定されていればそちら優先（InputSystem_Actions の Player/Interact）
-            if (openAction != null && openAction.action != null && openAction.action.WasPressedThisFrame())
+            // ① openAction が設定されている場合：
+            //    そのアクションの入力のみ判定し、結果をそのまま返す（他キーやInteractへの誤爆を完全に防止）
+            if (openAction != null && openAction.action != null)
             {
-                return true;
-            }
-
-            // ② フォールバック：InputPromptResolver の "Interact"/"Talk" 定義に合わせて
-            //    キーボード → F キー / ゲームパッド → buttonNorth (△/Y)
-            var device = InputDeviceManager.Instance?.CurrentDeviceType ?? InputDeviceType.KeyboardMouse;
-            if (device != InputDeviceType.Touchscreen)
-            {
-                var kb = Keyboard.current;
-                if (kb != null && kb.fKey.wasPressedThisFrame) return true;
-
-                var gp = Gamepad.current;
-                if (gp != null && gp.buttonNorth.wasPressedThisFrame) return true;
+                return openAction.action.WasPressedThisFrame();
             }
 #endif
-            // ③ Legacy Input フォールバック
-            return UnityEngine.Input.GetKeyDown(KeyCode.F);
+            // ② openAction が未設定の場合は false を返し、勝手に Interact (Fキー等) で開かないようにする
+            return false;
         }
 
         private float GetVerticalInput()

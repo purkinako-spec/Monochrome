@@ -41,6 +41,10 @@ namespace Runtime.Dialogue
 
         public bool IsTyping => typingCoroutine != null;
         public bool IsShowingChoices { get; private set; } = false;
+        public TextMeshProUGUI NameText => nameText;
+        public TextMeshProUGUI BodyText => bodyText;
+        public string CurrentSpeakerID => currentSpeakerID;
+        public string CurrentFullText => currentFullText;
 
         private void Awake()
         {
@@ -249,6 +253,44 @@ namespace Runtime.Dialogue
 
             ExecuteRemainingCommands(true);
             onCompleteCallback?.Invoke();
+        }
+
+        /// <summary>
+        /// 別の DialogueViewWindow から現在表示中のセリフ・話者名・タイピング進捗をシームレスに引き継ぎます。
+        /// Prefab丸ごと交換時の文字欠落やコルーチン二重発火を防止します。
+        /// </summary>
+        public void TransferStateFrom(DialogueViewWindow source)
+        {
+            if (source == null) return;
+
+            InitializeView();
+
+            currentSpeakerID = source.currentSpeakerID;
+            currentFullText = source.currentFullText;
+            currentCommands = source.currentCommands;
+            onCompleteCallback = source.onCompleteCallback;
+
+            if (source.nameText != null && nameText != null)
+            {
+                nameText.text = source.nameText.text;
+                nameText.enabled = source.nameText.enabled;
+            }
+
+            if (source.bodyText != null && bodyText != null)
+            {
+                bodyText.text = source.bodyText.text;
+                bodyText.enabled = source.bodyText.enabled;
+                bodyText.maxVisibleCharacters = source.bodyText.maxVisibleCharacters;
+                bodyText.ForceMeshUpdate();
+            }
+
+            if (fontDatabase == null && source.fontDatabase != null)
+            {
+                SetFontDatabase(source.fontDatabase);
+            }
+
+            // 元ウィンドウのタイピング中コルーチンを停止
+            source.StopAllCoroutines();
         }
 
         private void ExecuteRemainingCommands(bool forceComplete)

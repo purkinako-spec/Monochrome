@@ -39,8 +39,12 @@ namespace Runtime.Dialogue.Plugins.Portraits
         [Header("UI Slots")]
         public List<PortraitSlot> portraitSlots = new List<PortraitSlot>();
 
+        private List<PortraitSlot> defaultSlots = new List<PortraitSlot>();
+
         private void Awake()
         {
+            SaveDefaultSlots();
+
             // 初期位置を保存
             foreach (var slot in portraitSlots)
             {
@@ -48,6 +52,87 @@ namespace Runtime.Dialogue.Plugins.Portraits
                 {
                     slot.defaultPosition = slot.portraitImage.rectTransform.anchoredPosition;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 初期シーン配置のスロット構成をバックアップします。
+        /// </summary>
+        public void SaveDefaultSlots()
+        {
+            if (defaultSlots.Count == 0 && portraitSlots.Count > 0)
+            {
+                defaultSlots = new List<PortraitSlot>(portraitSlots);
+            }
+        }
+
+        /// <summary>
+        /// 新しいスロットリストへ動的に参照を再バインドします。
+        /// transferCurrentState=true の場合、直前に表示されていた立ち絵画像・アルファ・表情モーションを新スロットへ引き継ぎます。
+        /// </summary>
+        public void RebindSlots(List<PortraitSlot> newSlots, bool transferCurrentState = true)
+        {
+            SaveDefaultSlots();
+
+            // 1. 各スロットの現在状態をスナップショット保存
+            var snapshots = new Dictionary<string, (Sprite sprite, float alpha, bool active, RuntimeAnimatorController controller)>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var s in portraitSlots)
+            {
+                if (s == null || string.IsNullOrEmpty(s.positionID)) continue;
+                if (s.currentRoutine != null) StopCoroutine(s.currentRoutine);
+
+                Sprite sp = s.portraitImage != null ? s.portraitImage.sprite : null;
+                float a = GetSlotAlpha(s);
+                bool act = s.portraitImage != null && s.portraitImage.gameObject.activeSelf;
+                RuntimeAnimatorController ctrl = s.animator != null ? s.animator.runtimeAnimatorController : null;
+                snapshots[s.positionID] = (sp, a, act, ctrl);
+            }
+
+            // 2. スロットリストを更新
+            portraitSlots = new List<PortraitSlot>(newSlots);
+
+            // 3. 各新スロットの初期位置記録＆状態復元
+            foreach (var slot in portraitSlots)
+            {
+                if (slot == null || slot.portraitImage == null) continue;
+
+                slot.defaultPosition = slot.portraitImage.rectTransform.anchoredPosition;
+
+                if (transferCurrentState && snapshots.TryGetValue(slot.positionID, out var state))
+                {
+                    slot.portraitImage.sprite = state.sprite;
+                    if (state.active && state.sprite != null && state.alpha > 0f)
+                    {
+                        slot.portraitImage.gameObject.SetActive(true);
+                        SetSlotAlpha(slot, state.alpha);
+                        if (slot.animator != null && state.controller != null)
+                        {
+                            slot.animator.runtimeAnimatorController = state.controller;
+                        }
+                    }
+                    else
+                    {
+                        SetSlotAlpha(slot, 0f);
+                        slot.portraitImage.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    SetSlotAlpha(slot, 0f);
+                    slot.portraitImage.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 初期スロット（デフォルト配置）へ安全に復帰します。
+        /// </summary>
+        public void RestoreDefaultSlots(bool transferCurrentState = true)
+        {
+            if (defaultSlots != null && defaultSlots.Count > 0)
+            {
+                RebindSlots(defaultSlots, transferCurrentState);
             }
         }
 
@@ -308,7 +393,7 @@ namespace Runtime.Dialogue.Plugins.Portraits
             }
         }
 
-        private void SetSlotAlpha(PortraitSlot slot, float alpha)
+        public void SetSlotAlpha(PortraitSlot slot, float alpha)
         {
             if (slot.canvasGroup != null)
             {
@@ -322,7 +407,7 @@ namespace Runtime.Dialogue.Plugins.Portraits
             }
         }
 
-        private float GetSlotAlpha(PortraitSlot slot)
+        public float GetSlotAlpha(PortraitSlot slot)
         {
             if (slot.canvasGroup != null) return slot.canvasGroup.alpha;
             if (slot.portraitImage != null) return slot.portraitImage.color.a;

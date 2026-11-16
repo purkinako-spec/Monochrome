@@ -452,6 +452,7 @@ GameObject:
   - component: {fileID: 4685606914188458660}
   - component: {fileID: 8469455074365621582}
   - component: {fileID: 2057816325404785628}
+  - component: {fileID: 9182736451029384756}
   m_Layer: 0
   m_Name: LayoutHandlers
   m_TagString: Untagged
@@ -551,6 +552,26 @@ MonoBehaviour:
   replaceMode: 0
   textRectTransform: {fileID: 0}
   prefabMappings: []
+--- !u!114 &9182736451029384756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2714832708699071896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7f8d9a0b1c243567890123456789abc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Plugins.Layouts.CompositeDialogueLayoutHandler
+  priority: 25
+  mountParent: {fileID: 3183802275182441326}
+  defaultWindowRoot: {fileID: 8746133092788841531}
+  defaultPortraitRoot: {fileID: 7393342474216638509}
+  portraitHandler: {fileID: 1057123303710048259}
+  spriteSwapHandler: {fileID: 8469455074365621582}
+  mappings: []
+  restoreDefaultOnDialogueEnd: 1
 --- !u!1 &3005989643931344943
 GameObject:
   m_ObjectHideFlags: 0
@@ -597,6 +618,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.DialogueInputHandler
   nextPageSEKey: next_page
   dialogueView: {fileID: 6113977625182445273}
+--- !u!1 &3025769242820938406
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2366167981633091044}
+  m_Layer: 0
+  m_Name: DialogueViewRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2366167981633091044
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3025769242820938406}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 661933341258016803}
+  - {fileID: 9188795208628092090}
+  m_Father: {fileID: 3183802275182441326}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3551682929868640132
 GameObject:
   m_ObjectHideFlags: 0
@@ -2437,7 +2491,7 @@ Transform:
   - {fileID: 6707583483117870039}
   - {fileID: 1578061930169983701}
   - {fileID: 7330554411915031371}
-  m_Father: {fileID: 3183802275182441326}
+  m_Father: {fileID: 2366167981633091044}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7807668273551901627
 GameObject:
@@ -2740,7 +2794,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8746133092788841531}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2748,12 +2802,12 @@ RectTransform:
   - {fileID: 9067469486058250049}
   - {fileID: 1266691079118362658}
   - {fileID: 1506638916994045535}
-  m_Father: {fileID: 3183802275182441326}
+  m_Father: {fileID: 2366167981633091044}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -325}
-  m_SizeDelta: {x: -100, y: -750}
+  m_SizeDelta: {x: 1180, y: 210}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1962356035711226178
 CanvasRenderer:
@@ -3050,8 +3104,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7921654264277523022}
-  - {fileID: 661933341258016803}
-  - {fileID: 9188795208628092090}
+  - {fileID: 2366167981633091044}
   m_Father: {fileID: 478093970042547107}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

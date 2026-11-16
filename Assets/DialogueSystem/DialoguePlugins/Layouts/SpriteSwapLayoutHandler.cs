@@ -7,17 +7,45 @@ using UnityEngine;
 namespace DialoguePlugins.Layouts
 {
     [HandlerInfo(
-        description: "ƒŒƒCƒAƒEƒg–¼‚É‘Î‰‚·‚éƒXƒvƒ‰ƒCƒg‰æ‘œ‚Ö“®“I‚É·‚µ‘Ö‚¦‚Ü‚·B",
-        usage: "g‚¢•û: [layout:name=SpriteSwap, sprite=Character_Happy]"
+        description: "ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆåã«å¯¾å¿œã™ã‚‹ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆç”»åƒã¸å‹•çš„ã«å·®ã—æ›¿ãˆã¾ã™ã€‚",
+        usage: "ä½¿ã„æ–¹: [layout:name=SpriteSwap, sprite=Character_Happy]"
     )]
     public class SpriteSwapLayoutHandler : MonoBehaviour, IDialogueLayoutHandler
     {
         public int Priority => 10;
 
-        [Header("ƒXƒvƒ‰ƒCƒg·‚µ‘Ö‚¦‘ÎÛ‚ÌUIƒRƒ“ƒ|[ƒlƒ“ƒg")]
+        [Header("ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆå·®ã—æ›¿ãˆå¯¾è±¡ã®UIã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ")]
         [SerializeField] private UnityEngine.UI.Image targetImage;
 
-        [Header("—˜—p‰Â”\‚ÈƒXƒvƒ‰ƒCƒg‚ÌƒŠƒXƒgi‚Ü‚½‚Íƒf[ƒ^ƒx[ƒXj")]
+        private UnityEngine.UI.Image defaultTargetImage;
+
+        public UnityEngine.UI.Image TargetImage
+        {
+            get => targetImage;
+            set
+            {
+                SaveDefaultTargetImage();
+                targetImage = value;
+            }
+        }
+
+        public void SaveDefaultTargetImage()
+        {
+            if (defaultTargetImage == null && targetImage != null)
+            {
+                defaultTargetImage = targetImage;
+            }
+        }
+
+        public void RestoreDefaultTargetImage()
+        {
+            if (defaultTargetImage != null)
+            {
+                targetImage = defaultTargetImage;
+            }
+        }
+
+        [Header("åˆ©ç”¨å¯èƒ½ãªã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã®ãƒªã‚¹ãƒˆï¼ˆã¾ãŸã¯ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ï¼‰")]
         [SerializeField] private List<SpriteMapping> spriteMappings = new List<SpriteMapping>();
 
         [System.Serializable]
@@ -29,7 +57,7 @@ namespace DialoguePlugins.Layouts
 
         private void Start()
         {
-            // ƒfƒBƒXƒpƒbƒ`ƒƒ[‚Ö©•ª©g‚ğ©“®“o˜^
+            // ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒãƒ£ãƒ¼ã¸è‡ªåˆ†è‡ªèº«ã‚’è‡ªå‹•ç™»éŒ²
             if (DialogueLayoutDispatcher.Instance != null)
             {
                 DialogueLayoutDispatcher.Instance.RegisterHandler(this);
@@ -38,7 +66,7 @@ namespace DialoguePlugins.Layouts
 
         public bool TryHandleLayout(string layoutName, Dictionary<string, string> arguments)
         {
-            // ‚±‚Ìƒnƒ“ƒhƒ‰[‚ªˆ—‚·‚×‚«ƒŒƒCƒAƒEƒg–¼‚©”»’èi—á: "SpriteSwap" ‚Ü‚½‚Í’¼Ú‰æ‘œƒL[‚ğw’èj
+            // ã“ã®ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ãŒå‡¦ç†ã™ã¹ããƒ¬ã‚¤ã‚¢ã‚¦ãƒˆåã‹åˆ¤å®šï¼ˆä¾‹: "SpriteSwap" ã¾ãŸã¯ç›´æ¥ç”»åƒã‚­ãƒ¼ã‚’æŒ‡å®šï¼‰
             string spriteKey = layoutName;
             if (arguments != null && arguments.ContainsKey("sprite"))
             {
@@ -49,7 +77,7 @@ namespace DialoguePlugins.Layouts
             if (mapping.sprite != null && targetImage != null)
             {
                 targetImage.sprite = mapping.sprite;
-                Debug.Log($"[SpriteSwapLayoutHandler] ƒXƒvƒ‰ƒCƒg‚ğ '{spriteKey}' ‚É·‚µ‘Ö‚¦‚Ü‚µ‚½B");
+                Debug.Log($"[SpriteSwapLayoutHandler] ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆã‚’ '{spriteKey}' ã«å·®ã—æ›¿ãˆã¾ã—ãŸã€‚");
                 return true;
             }
 
