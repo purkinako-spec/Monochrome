@@ -189,10 +189,10 @@ namespace Runtime.Dialogue
             DisplaySentence(speakerID, cleanText, new List<DialogueCommand>(), onTypingComplete);
         }
 
-        private IEnumerator TypeTextRoutine()
+        private IEnumerator TypeTextRoutine(int startIndex = 0)
         {
             bodyText.text = currentFullText;
-            bodyText.maxVisibleCharacters = 0;
+            bodyText.maxVisibleCharacters = startIndex;
             bodyText.ForceMeshUpdate();
 
             typewriterAudio?.ResetCounter();
@@ -206,7 +206,7 @@ namespace Runtime.Dialogue
             }
 
             int totalVisibleChars = bodyText.textInfo.characterCount;
-            int currentVisibleIndex = 0;
+            int currentVisibleIndex = startIndex;
 
             while (currentVisibleIndex < totalVisibleChars)
             {
@@ -257,40 +257,83 @@ namespace Runtime.Dialogue
 
         /// <summary>
         /// 別の DialogueViewWindow から現在表示中のセリフ・話者名・タイピング進捗をシームレスに引き継ぎます。
-        /// Prefab丸ごと交換時の文字欠落やコルーチン二重発火を防止します。
+        /// Prefab丸ごと交換時の文字欠落やコルーチン二重発火を防止し、タイピング中であれば新ウィンドウでスムーズに継続します。
         /// </summary>
-        public void TransferStateFrom(DialogueViewWindow source)
+        public void TransferStateFrom(DialogueViewWindow source, bool resumeTyping = true)
         {
             if (source == null) return;
 
-            InitializeView();
+            // ウィンドウ・テキスト表示コンポーネントを確実にアクティブ化（AwakeでのCloseViewを解除）
+            if (windowRoot != null) windowRoot.SetActive(true);
+            if (bodyText != null) bodyText.enabled = true;
+            if (nameText != null) nameText.enabled = true;
+
+            var bgImage = windowRoot != null ? windowRoot.GetComponent<UnityEngine.UI.Image>() : null;
+            if (bgImage != null) bgImage.enabled = true;
 
             currentSpeakerID = source.currentSpeakerID;
             currentFullText = source.currentFullText;
             currentCommands = source.currentCommands;
             onCompleteCallback = source.onCompleteCallback;
 
-            if (source.nameText != null && nameText != null)
-            {
-                nameText.text = source.nameText.text;
-                nameText.enabled = source.nameText.enabled;
-            }
-
-            if (source.bodyText != null && bodyText != null)
-            {
-                bodyText.text = source.bodyText.text;
-                bodyText.enabled = source.bodyText.enabled;
-                bodyText.maxVisibleCharacters = source.bodyText.maxVisibleCharacters;
-                bodyText.ForceMeshUpdate();
-            }
-
+            // フォントの適用
             if (fontDatabase == null && source.fontDatabase != null)
             {
                 SetFontDatabase(source.fontDatabase);
             }
+            ApplySpeakerFont(currentSpeakerID);
+
+            if (nameText != null)
+            {
+                nameText.text = source.nameText != null && !string.IsNullOrEmpty(source.nameText.text)
+                    ? source.nameText.text
+                    : (currentSpeakerID ?? "");
+                nameText.enabled = !string.IsNullOrEmpty(nameText.text);
+            }
+
+            bool wasTyping = source.IsTyping;
+            int currentChars = source.bodyText != null ? source.bodyText.maxVisibleCharacters : 0;
 
             // 元ウィンドウのタイピング中コルーチンを停止
             source.StopAllCoroutines();
+
+            // 既に到達・実行されたコマンドを確実にIsExecuted=trueにして新ウィンドウでの重複実行を防止
+            // ※ currentChars と同じ位置のコマンドは「まだ実行中 or これから実行」なので除外する（< で比較）
+            if (currentCommands != null)
+            {
+                foreach (var cmd in currentCommands)
+                {
+                    if (cmd != null && cmd.CharacterIndex < currentChars)
+                    {
+                        cmd.IsExecuted = true;
+                    }
+                }
+            }
+
+            if (bodyText != null)
+            {
+                bodyText.text = currentFullText ?? "";
+                bodyText.ForceMeshUpdate();
+
+                if (typingCoroutine != null)
+                {
+                    StopCoroutine(typingCoroutine);
+                    typingCoroutine = null;
+                }
+
+                if (resumeTyping && wasTyping && !string.IsNullOrEmpty(currentFullText))
+                {
+                    // タイピングを中断位置から継続
+                    typingCoroutine = StartCoroutine(TypeTextRoutine(currentChars));
+                }
+                else
+                {
+                    // タイピング完了状態（全文字表示）
+                    bodyText.maxVisibleCharacters = 99999;
+                    bodyText.ForceMeshUpdate();
+                    onCompleteCallback?.Invoke();
+                }
+            }
         }
 
         private void ExecuteRemainingCommands(bool forceComplete)

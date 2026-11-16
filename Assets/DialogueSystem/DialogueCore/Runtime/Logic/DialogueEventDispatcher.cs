@@ -71,11 +71,13 @@ namespace Runtime.Dialogue
 
         public void ExecuteCommand(DialogueCommand command, Action onComplete)
         {
-            if (command == null)
+            if (command == null || command.IsExecuted)
             {
                 onComplete?.Invoke();
                 return;
             }
+
+            command.IsExecuted = true;
 
             string key = command.CommandName?.ToLower() ?? string.Empty;
 
@@ -83,14 +85,12 @@ namespace Runtime.Dialogue
             {
                 handler.Execute(command, () =>
                 {
-                    command.IsExecuted = true;
                     onComplete?.Invoke();
                 });
             }
             else
             {
                 Debug.LogWarning($"[Dialogue] 未登録のコマンド '{key}' が来ました。");
-                command.IsExecuted = true;
                 onComplete?.Invoke();
             }
         }

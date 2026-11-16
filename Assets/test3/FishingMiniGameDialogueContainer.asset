@@ -38,7 +38,7 @@ MonoBehaviour:
     speakerName: 
     dialogueText: '[minigame:scene=FishingMinigameSceneTest2,flag=minigame_fishing_cleared,fade=true][end_dialogue:fade=0.5]'
     choices: []
-  - graphPosition: {x: -127, y: 100}
+  - graphPosition: {x: -121, y: 100}
     nextNodeID: 
     nodeID: Node_d46da
     speakerName: "\u91E3\u308A\u4EBA"

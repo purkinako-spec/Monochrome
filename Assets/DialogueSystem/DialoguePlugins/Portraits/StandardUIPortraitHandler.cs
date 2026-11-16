@@ -55,6 +55,28 @@ namespace Runtime.Dialogue.Plugins.Portraits
             }
         }
 
+        public static string NormalizePosition(string pos)
+        {
+            if (string.IsNullOrEmpty(pos)) return "";
+            string lower = pos.Trim().ToLowerInvariant();
+            if (lower == "l" || lower == "left") return "L";
+            if (lower == "r" || lower == "right") return "R";
+            if (lower == "c" || lower == "center" || lower == "mid" || lower == "middle") return "C";
+            return pos;
+        }
+
+        public static bool IsPositionMatch(string slotPos, string queryPos)
+        {
+            if (string.Equals(slotPos, queryPos, StringComparison.OrdinalIgnoreCase)) return true;
+            return string.Equals(NormalizePosition(slotPos), NormalizePosition(queryPos), StringComparison.OrdinalIgnoreCase);
+        }
+
+        public PortraitSlot FindSlotByPosition(string position)
+        {
+            if (portraitSlots == null) return null;
+            return portraitSlots.Find(s => s != null && IsPositionMatch(s.positionID, position));
+        }
+
         /// <summary>
         /// 初期シーン配置のスロット構成をバックアップします。
         /// </summary>
@@ -246,7 +268,7 @@ namespace Runtime.Dialogue.Plugins.Portraits
             if (profile == null) return false;
 
             var sprite = profile.GetExpression(expression);
-            var slot = portraitSlots.Find(s => s.positionID == position);
+            var slot = FindSlotByPosition(position);
             if (slot == null || slot.portraitImage == null) return false;
 
             // コルーチン重なり防止
@@ -320,7 +342,7 @@ namespace Runtime.Dialogue.Plugins.Portraits
 
             List<PortraitSlot> targetSlots = (string.IsNullOrEmpty(position) || position.ToLower() == "all")
                 ? portraitSlots
-                : portraitSlots.FindAll(s => s.positionID == position);
+                : portraitSlots.FindAll(s => s != null && IsPositionMatch(s.positionID, position));
 
             int pending = targetSlots.Count;
             if (pending == 0)
@@ -378,7 +400,7 @@ namespace Runtime.Dialogue.Plugins.Portraits
 
             // データベース優先でプロファイルを検索
             var profile = FindProfile(targetID);
-            var slot = portraitSlots.Find(s => s.positionID == position);
+            var slot = FindSlotByPosition(position);
             if (profile != null && slot != null && slot.portraitImage != null)
             {
                 // スキップ時も AnimatorController を動的セット

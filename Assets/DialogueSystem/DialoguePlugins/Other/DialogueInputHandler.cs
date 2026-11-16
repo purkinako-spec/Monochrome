@@ -21,6 +21,8 @@ namespace Runtime.Dialogue
         private float startInputCooldown = 0f;
         private DialogueState prevState = DialogueState.Idle;
 
+        private DialogueViewWindow ActiveView => (DialogueManager.Instance?.CurrentView as DialogueViewWindow) ?? dialogueView;
+
         private void Awake()
         {
             if (dialogueView == null)
@@ -67,7 +69,7 @@ namespace Runtime.Dialogue
             if (isMousePressed || isStandardKeyboard || isFKeyPressed)
             {
                 // 選択肢が表示されている間は、UIへのクリック誤爆を防ぐためガード
-                if (isMousePressed && dialogueView != null && dialogueView.IsShowingChoices)
+                if (isMousePressed && ActiveView != null && ActiveView.IsShowingChoices)
                 {
                     if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(PointerInputModule.kMouseLeftId))
                     {
@@ -96,7 +98,7 @@ namespace Runtime.Dialogue
         /// </summary>
         public void HandleAdvance()
         {
-            if (dialogueView != null && dialogueView.IsShowingChoices) return;
+            if (ActiveView != null && ActiveView.IsShowingChoices) return;
 
             // 会話送りSE再生
             DialogueAudioManager.Instance?.PlaySE(nextPageSEKey);

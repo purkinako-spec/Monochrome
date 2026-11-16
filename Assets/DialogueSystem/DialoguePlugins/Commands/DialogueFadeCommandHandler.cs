@@ -6,33 +6,35 @@ using Runtime.Dialogue.Core;
 namespace Runtime.Dialogue.Plugins.Commands
 {
     /// <summary>
-    /// ‰ï˜bƒEƒBƒ“ƒhƒEiƒ_ƒCƒAƒƒO˜gj‘S‘Ì‚ÌƒtƒF[ƒhƒCƒ“/ƒtƒF[ƒhƒAƒEƒg‰‰o‚ğs‚¤ƒvƒ‰ƒOƒCƒ“
+    /// ä¼šè©±ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ï¼ˆãƒ€ã‚¤ã‚¢ãƒ­ã‚°æ ï¼‰å…¨ä½“ã®ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³/ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆæ¼”å‡ºã‚’è¡Œã†ãƒ—ãƒ©ã‚°ã‚¤ãƒ³
     /// </summary>
     [HandlerInfo(
-        description: @"ƒ_ƒCƒAƒƒOƒEƒBƒ“ƒhƒEiCanvasGroupj‘S‘Ì‚ÌƒtƒF[ƒhƒCƒ“EƒtƒF[ƒhƒAƒEƒg‰‰o‚ğs‚¤ƒRƒ}ƒ“ƒhƒnƒ“ƒhƒ‰[‚Å‚·B
-‰ï˜b‚ÌŠJnEI—¹‚Ì©“®ƒtƒF[ƒhƒCƒ“EƒAƒEƒg‚É‚à‘Î‰‚µ‚Ä‚¢‚Ü‚·B",
-        usage: @"yŠî–{ƒpƒ‰ƒ[ƒ^z
-[dialogue_fade:type=in/out, time=•b”]
+        description: @"ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ï¼ˆCanvasGroupï¼‰å…¨ä½“ã®ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ»ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆæ¼”å‡ºã‚’è¡Œã†ã‚³ãƒãƒ³ãƒ‰ãƒãƒ³ãƒ‰ãƒ©ãƒ¼ã§ã™ã€‚
+ä¼šè©±ã®é–‹å§‹ãƒ»çµ‚äº†æ™‚ã®è‡ªå‹•ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ»ã‚¢ã‚¦ãƒˆã«ã‚‚å¯¾å¿œã—ã¦ã„ã¾ã™ã€‚",
+        usage: @"ã€åŸºæœ¬ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã€‘
+[dialogue_fade:type=in/out, time=ç§’æ•°]
 
-yg—p—áz
-EƒtƒF[ƒhƒCƒ“•\¦ (0.5•b): [dialogue_fade:type=in,time=0.5]
-EƒtƒF[ƒhƒAƒEƒg”ñ•\¦ (1.0•b): [dialogue_fade:type=out,time=1.0]"
+ã€ä½¿ç”¨ä¾‹ã€‘
+ãƒ»ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³è¡¨ç¤º (0.5ç§’): [dialogue_fade:type=in,time=0.5]
+ãƒ»ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆéè¡¨ç¤º (1.0ç§’): [dialogue_fade:type=out,time=1.0]"
     )]
     public class DialogueFadeCommandHandler : MonoBehaviour, IDialogueCommandHandler
     {
         public string TargetCommandName => "dialogue_fade";
 
         [Header("Target UI")]
-        [Tooltip("ƒtƒF[ƒh‚³‚¹‚éƒ_ƒCƒAƒƒOUI‘S‘Ì‚Ì CanvasGroup ‚ğƒZƒbƒg‚µ‚Ä‚­‚¾‚³‚¢")]
+        [Tooltip("ãƒ•ã‚§ãƒ¼ãƒ‰ã•ã›ã‚‹ãƒ€ã‚¤ã‚¢ãƒ­ã‚°UIå…¨ä½“ã® CanvasGroup ã‚’ã‚»ãƒƒãƒˆã—ã¦ãã ã•ã„")]
         [SerializeField] private CanvasGroup targetCanvasGroup;
 
+        private CanvasGroup defaultCanvasGroup;
+
         [Header("Auto Fade Settings")]
-        [Tooltip("‰ï˜b•\¦ŠJn‚É©“®‚ÅƒtƒF[ƒhƒCƒ“‚ğs‚¤‚©")]
+        [Tooltip("ä¼šè©±è¡¨ç¤ºé–‹å§‹æ™‚ã«è‡ªå‹•ã§ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¤ãƒ³ã‚’è¡Œã†ã‹")]
         [SerializeField] private bool autoFadeInOnStart = true;
         [SerializeField] private float autoFadeInTime = 0.5f;
 
         [Space(5)]
-        [Tooltip("‰ï˜bI—¹‚É©“®‚ÅƒtƒF[ƒhƒAƒEƒg‚ğs‚¤‚©")]
+        [Tooltip("ä¼šè©±çµ‚äº†æ™‚ã«è‡ªå‹•ã§ãƒ•ã‚§ãƒ¼ãƒ‰ã‚¢ã‚¦ãƒˆã‚’è¡Œã†ã‹")]
         [SerializeField] private bool autoFadeOutOnEnd = true;
         [SerializeField] private float autoFadeOutTime = 0.5f;
 
@@ -45,7 +47,10 @@ namespace Runtime.Dialogue.Plugins.Commands
                 DialogueEventDispatcher.Instance.RegisterHandler(this);
             }
 
-            // ‰Šúó‘Ô‚Ì“§–¾‰»İ’è
+            // åˆæœŸCanvasGroupã‚’ä¿å­˜ï¼ˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆå¾©å¸°æ™‚ã«ä½¿ã†ï¼‰
+            defaultCanvasGroup = targetCanvasGroup;
+
+            // åˆæœŸçŠ¶æ…‹ã®é€æ˜åŒ–è¨­å®š
             if (autoFadeInOnStart && targetCanvasGroup != null)
             {
                 targetCanvasGroup.alpha = 0f;
@@ -53,26 +58,52 @@ namespace Runtime.Dialogue.Plugins.Commands
             }
         }
 
-        // --- ‰ï˜bŠJniUI•\¦j‚ÉŒÄ‚ÔƒpƒuƒŠƒbƒNƒƒ\ƒbƒh ---
+        /// <summary>
+        /// ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆåˆ‡ã‚Šæ›¿ãˆæ™‚ã«å‘¼ã°ã‚Œã‚‹ã€‚ãƒ•ã‚§ãƒ¼ãƒ‰å¯¾è±¡CanvasGroupã‚’åˆ‡ã‚Šæ›¿ãˆå…ˆã«å·®ã—æ›¿ãˆã‚‹ã€‚
+        /// </summary>
+        public void SetTargetCanvasGroup(CanvasGroup newGroup)
+        {
+            if (currentFadeCoroutine != null)
+            {
+                StopCoroutine(currentFadeCoroutine);
+                currentFadeCoroutine = null;
+            }
+            targetCanvasGroup = newGroup;
+        }
+
+        /// <summary>
+        /// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã¸å¾©å¸°æ™‚ã«å‘¼ã°ã‚Œã‚‹ã€‚ãƒ•ã‚§ãƒ¼ãƒ‰å¯¾è±¡CanvasGroupã‚’å…ƒã«æˆ»ã™ã€‚
+        /// </summary>
+        public void RestoreDefaultCanvasGroup()
+        {
+            if (currentFadeCoroutine != null)
+            {
+                StopCoroutine(currentFadeCoroutine);
+                currentFadeCoroutine = null;
+            }
+            targetCanvasGroup = defaultCanvasGroup;
+        }
+
+        // --- ä¼šè©±é–‹å§‹æ™‚ï¼ˆUIè¡¨ç¤ºæ™‚ï¼‰ã«å‘¼ã¶ãƒ‘ãƒ–ãƒªãƒƒã‚¯ãƒ¡ã‚½ãƒƒãƒ‰ ---
         public void OnDialogueStart()
         {
             if (!autoFadeInOnStart || targetCanvasGroup == null) return;
             StartFade("in", autoFadeInTime, null);
         }
 
-        // --- ‰ï˜bI—¹iUI”ñ•\¦j‚ÉŒÄ‚ÔƒpƒuƒŠƒbƒNƒƒ\ƒbƒh ---
+        // --- ä¼šè©±çµ‚äº†æ™‚ï¼ˆUIéè¡¨ç¤ºæ™‚ï¼‰ã«å‘¼ã¶ãƒ‘ãƒ–ãƒªãƒƒã‚¯ãƒ¡ã‚½ãƒƒãƒ‰ ---
         public void OnDialogueEnd()
         {
             if (!autoFadeOutOnEnd || targetCanvasGroup == null) return;
             StartFade("out", autoFadeOutTime, null);
         }
 
-        // --- ƒRƒ}ƒ“ƒhÀsƒnƒ“ƒhƒ‰[ ---
+        // --- ã‚³ãƒãƒ³ãƒ‰å®Ÿè¡Œãƒãƒ³ãƒ‰ãƒ©ãƒ¼ ---
         public void Execute(DialogueCommand command, Action onComplete)
         {
             if (targetCanvasGroup == null)
             {
-                Debug.LogWarning("[DialogueFade] targetCanvasGroup ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñI");
+                Debug.LogWarning("[DialogueFade] targetCanvasGroup ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ï¼");
                 onComplete?.Invoke();
                 return;
             }

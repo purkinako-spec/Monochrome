@@ -193,10 +193,13 @@ namespace Runtime.Dialogue.Logic
             CurrentView?.InitializeView();
         }
 
-        public void RegisterView(IDialogueView view)
+        public void RegisterView(IDialogueView view, bool resetView = true)
         {
             CurrentView = view;
-            CurrentView?.InitializeView();
+            if (resetView)
+            {
+                CurrentView?.InitializeView();
+            }
         }
 
         /// <summary>

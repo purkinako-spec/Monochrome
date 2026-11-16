@@ -6,76 +6,11 @@ using Runtime.Dialogue;
 using Runtime.Dialogue.Core;
 using Runtime.Dialogue.Logic;
 using Runtime.Dialogue.Plugins.Portraits;
+using Runtime.Dialogue.Plugins.Commands;
 using DialoguePlugins.Layouts;
 
 namespace Runtime.Dialogue.Plugins.Layouts
 {
-    /// <summary>
-    /// 統合UI Prefab（DialogueUIWindow と PortraitRoot がセットになったPrefab）に
-    /// 設定する参照ヘルパーコンポーネント。
-    /// 未設定でも自動検出されますが、明示的に指定することで確実な動作が保証されます。
-    /// </summary>
-    [AddComponentMenu("Dialogue/Layout/Composite Dialogue Setup")]
-    public class CompositeDialogueSetup : MonoBehaviour
-    {
-        [Header("Dialogue Window (必須)")]
-        [Tooltip("このPrefabに含まれる DialogueViewWindow")]
-        public DialogueViewWindow dialogueViewWindow;
-
-        [Tooltip("背景スプライト差し替え（SpriteSwap）対象の Image コンポーネント（任意）")]
-        public Image backgroundTargetImage;
-
-        [Header("Portrait Root & Slots (立ち絵スロット)")]
-        [Tooltip("立ち絵スロット群の親 Transform または GameObject")]
-        public GameObject portraitRoot;
-
-        [Tooltip("立ち絵スロットのリスト（未登録時は子要素の Image から自動収集）")]
-        public List<PortraitSlot> portraitSlots = new List<PortraitSlot>();
-
-        public void AutoDetectReferences()
-        {
-            if (dialogueViewWindow == null)
-            {
-                dialogueViewWindow = GetComponentInChildren<DialogueViewWindow>(true);
-            }
-
-            if (backgroundTargetImage == null && dialogueViewWindow != null)
-            {
-                backgroundTargetImage = dialogueViewWindow.GetComponent<Image>()
-                    ?? dialogueViewWindow.GetComponentInChildren<Image>(true);
-            }
-
-            if (portraitRoot == null)
-            {
-                var pTrans = transform.Find("PortraitRoot") ?? transform.Find("Portraits") ?? transform.Find("Portrait");
-                if (pTrans != null) portraitRoot = pTrans.gameObject;
-            }
-
-            if (portraitSlots.Count == 0 && portraitRoot != null)
-            {
-                var images = portraitRoot.GetComponentsInChildren<Image>(true);
-                foreach (var img in images)
-                {
-                    if (img.gameObject == portraitRoot) continue;
-                    string rawName = img.gameObject.name.ToLower();
-                    string posId = "center";
-                    if (rawName.Contains("left")) posId = "left";
-                    else if (rawName.Contains("right")) posId = "right";
-                    else if (rawName.Contains("center") || rawName.Contains("mid")) posId = "center";
-                    else posId = rawName;
-
-                    portraitSlots.Add(new PortraitSlot
-                    {
-                        positionID = posId,
-                        portraitImage = img,
-                        canvasGroup = img.GetComponent<CanvasGroup>(),
-                        animator = img.GetComponent<Animator>()
-                    });
-                }
-            }
-        }
-    }
-
     /// <summary>
     /// レイアウト名と統合Prefabのマッピング定義
     /// </summary>
@@ -138,6 +73,7 @@ namespace Runtime.Dialogue.Plugins.Layouts
         [Header("連携ハンドラー (未指定時は自動検索)")]
         [SerializeField] private StandardUIPortraitHandler portraitHandler;
         [SerializeField] private SpriteSwapLayoutHandler spriteSwapHandler;
+        [SerializeField] private DialogueFadeCommandHandler fadeHandler;
 
         [Header("レイアウトPrefab登録リスト")]
         [SerializeField] private List<CompositeLayoutMapping> mappings = new List<CompositeLayoutMapping>();
@@ -222,6 +158,11 @@ namespace Runtime.Dialogue.Plugins.Layouts
                 spriteSwapHandler = FindFirstObjectByType<SpriteSwapLayoutHandler>();
             }
 
+            if (fadeHandler == null)
+            {
+                fadeHandler = FindFirstObjectByType<DialogueFadeCommandHandler>();
+            }
+
             if (portraitHandler != null)
             {
                 portraitHandler.SaveDefaultSlots();
@@ -282,7 +223,13 @@ namespace Runtime.Dialogue.Plugins.Layouts
             DialogueViewWindow oldView = DialogueManager.Instance?.CurrentView as DialogueViewWindow;
             if (oldView == null) oldView = defaultView;
 
-            // 2. 現在アクティブな統合インスタンスを非アクティブ化
+            // 既に該当の統合レイアウトがアクティブであれば二重適用をスキップしてコルーチン中断を防止
+            if (currentActiveInstance != null && currentActiveInstance.name == $"[Composite_{mapping.layoutName}]" && currentActiveInstance.activeSelf)
+            {
+                return;
+            }
+
+            // 2. 別の統合インスタンスがアクティブな場合は非アクティブ化
             if (currentActiveInstance != null)
             {
                 currentActiveInstance.SetActive(false);
@@ -290,11 +237,9 @@ namespace Runtime.Dialogue.Plugins.Layouts
             }
 
             // 3. 初期デフォルトルート（DialogueUIWindow / PortraitRoot）の非表示化
-            if (mapping.hideDefaultRoots)
-            {
-                if (defaultWindowRoot != null) defaultWindowRoot.SetActive(false);
-                if (defaultPortraitRoot != null) defaultPortraitRoot.SetActive(false);
-            }
+            // 統合レイアウトがアクティブな間はデフォルトのUI・立ち絵を非表示にして重複を防止
+            if (defaultWindowRoot != null) defaultWindowRoot.SetActive(false);
+            if (defaultPortraitRoot != null) defaultPortraitRoot.SetActive(false);
 
             // 4. キャッシュまたは新規インスタンスの取得
             GameObject targetObj = null;
@@ -308,11 +253,17 @@ namespace Runtime.Dialogue.Plugins.Layouts
                 targetObj = Instantiate(mapping.compositePrefab, mountParent);
                 targetObj.name = $"[Composite_{mapping.layoutName}]";
 
+                targetObj.transform.localPosition = Vector3.zero;
+                targetObj.transform.localRotation = Quaternion.identity;
+                targetObj.transform.localScale = Vector3.one;
+
                 if (targetObj.transform is RectTransform rt)
                 {
-                    rt.localPosition = Vector3.zero;
-                    rt.localRotation = Quaternion.identity;
-                    rt.localScale = Vector3.one;
+                    rt.anchorMin = Vector2.zero;
+                    rt.anchorMax = Vector2.one;
+                    rt.offsetMin = Vector2.zero;
+                    rt.offsetMax = Vector2.zero;
+                    rt.pivot = new Vector2(0.5f, 0.5f);
                 }
 
                 spawnedInstances[mapping.layoutName] = targetObj;
@@ -330,23 +281,36 @@ namespace Runtime.Dialogue.Plugins.Layouts
             setup.AutoDetectReferences();
 
             // 6. DialogueManager へ新しい DialogueViewWindow を登録 ＆ テキスト状態の引き継ぎ
+            bool isPlaying = DialogueManager.Instance != null && DialogueManager.Instance.CurrentState == DialogueState.Playing;
+            bool shouldTransferDialogue = mapping.transferDialogueState || isPlaying;
+
             if (setup.dialogueViewWindow != null)
             {
-                if (mapping.transferDialogueState && oldView != null && oldView != setup.dialogueViewWindow)
-                {
-                    setup.dialogueViewWindow.TransferStateFrom(oldView);
-                }
-
+                // まず DialogueManager に新しい View を登録（ただしテキストは初期化・クリアさせない）
                 if (DialogueManager.Instance != null)
                 {
-                    DialogueManager.Instance.RegisterView(setup.dialogueViewWindow);
+                    DialogueManager.Instance.RegisterView(setup.dialogueViewWindow, resetView: false);
+                }
+
+                // 会話進行中、または明示的に引き継ぎ指定がある場合はセリフ状態を確実に引き継ぎ＆タイピング継続
+                if (shouldTransferDialogue && oldView != null && oldView != setup.dialogueViewWindow)
+                {
+                    setup.dialogueViewWindow.TransferStateFrom(oldView, resumeTyping: true);
+                }
+                else
+                {
+                    // 念のため windowRoot と bodyText を確実に有効化
+                    if (setup.dialogueViewWindow.windowRoot != null) setup.dialogueViewWindow.windowRoot.SetActive(true);
+                    if (setup.dialogueViewWindow.BodyText != null) setup.dialogueViewWindow.BodyText.enabled = true;
+                    if (setup.dialogueViewWindow.NameText != null) setup.dialogueViewWindow.NameText.enabled = true;
                 }
             }
 
             // 7. 立ち絵スロットの再バインド ＆ 直前立ち絵画像の引き継ぎ（不具合防止）
+            bool shouldTransferPortrait = mapping.transferPortraitState || true;
             if (portraitHandler != null && setup.portraitSlots != null && setup.portraitSlots.Count > 0)
             {
-                portraitHandler.RebindSlots(setup.portraitSlots, mapping.transferPortraitState);
+                portraitHandler.RebindSlots(setup.portraitSlots, shouldTransferPortrait);
             }
 
             // 8. SpriteSwapLayoutHandler（背景スプライト差し替え）との自動再バインド
@@ -355,7 +319,13 @@ namespace Runtime.Dialogue.Plugins.Layouts
                 spriteSwapHandler.TargetImage = setup.backgroundTargetImage;
             }
 
-            Debug.Log($"<color=cyan>[CompositeDialogueLayoutHandler]</color> 統合レイアウト '{mapping.layoutName}' へ丸ごと差し替えました。（立ち絵引継: {mapping.transferPortraitState}, テキスト引継: {mapping.transferDialogueState}）");
+            // 9. DialogueFadeCommandHandler のフェード対象を切り替え先のCanvasGroupに差し替え
+            if (fadeHandler != null && setup.fadeCanvasGroup != null)
+            {
+                fadeHandler.SetTargetCanvasGroup(setup.fadeCanvasGroup);
+            }
+
+            Debug.Log($"<color=cyan>[CompositeDialogueLayoutHandler]</color> 統合レイアウト '{mapping.layoutName}' へ丸ごと差し替えました。（立ち絵引継: {shouldTransferPortrait}, テキスト引継: {shouldTransferDialogue}）");
         }
 
         /// <summary>
@@ -374,7 +344,7 @@ namespace Runtime.Dialogue.Plugins.Layouts
                 // テキスト状態をデフォルトViewへ引き継ぎ
                 if (activeView != null && defaultView != null && activeView != defaultView)
                 {
-                    defaultView.TransferStateFrom(activeView);
+                    defaultView.TransferStateFrom(activeView, resumeTyping: true);
                 }
 
                 currentActiveInstance.SetActive(false);
@@ -385,10 +355,10 @@ namespace Runtime.Dialogue.Plugins.Layouts
             if (defaultWindowRoot != null) defaultWindowRoot.SetActive(true);
             if (defaultPortraitRoot != null) defaultPortraitRoot.SetActive(true);
 
-            // 3. DialogueManager にデフォルトViewを再登録
+            // 3. DialogueManager にデフォルトViewを再登録（テキストをクリアしない）
             if (defaultView != null && DialogueManager.Instance != null)
             {
-                DialogueManager.Instance.RegisterView(defaultView);
+                DialogueManager.Instance.RegisterView(defaultView, resetView: false);
             }
 
             // 4. 立ち絵スロットを初期配置へ復元（直前画像の引き継ぎも保持）
@@ -401,6 +371,12 @@ namespace Runtime.Dialogue.Plugins.Layouts
             if (spriteSwapHandler != null)
             {
                 spriteSwapHandler.RestoreDefaultTargetImage();
+            }
+
+            // 6. DialogueFadeCommandHandler のフェード対象をデフォルトに復元
+            if (fadeHandler != null)
+            {
+                fadeHandler.RestoreDefaultCanvasGroup();
             }
 
             isOverridden = false;
