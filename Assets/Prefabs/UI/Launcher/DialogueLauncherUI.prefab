@@ -304,7 +304,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 167.3254, y: -402.99994}
+  m_AnchoredPosition: {x: 142, y: -402.99994}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2004789291232165762
@@ -426,7 +426,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 80, y: 80}
+  m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8369220448111071788
 CanvasRenderer:
@@ -1625,7 +1625,7 @@ MonoBehaviour:
   normalSprite: {fileID: 0}
   selectedTextColor: {r: 0, g: 0, b: 0, a: 1}
   normalTextColor: {r: 0, g: 0, b: 0, a: 1}
-  cursorOffset: {x: -130, y: 0}
+  cursorOffset: {x: -135, y: 0}
   openAction: {fileID: 0}
   navigateAction: {fileID: 0}
   submitAction: {fileID: 0}

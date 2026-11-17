@@ -84,7 +84,19 @@ namespace Runtime.Dialogue.Plugins.Portraits
         {
             if (defaultSlots.Count == 0 && portraitSlots.Count > 0)
             {
-                defaultSlots = new List<PortraitSlot>(portraitSlots);
+                defaultSlots = new List<PortraitSlot>();
+                foreach (var s in portraitSlots)
+                {
+                    if (s == null) continue;
+                    defaultSlots.Add(new PortraitSlot
+                    {
+                        positionID = s.positionID,
+                        portraitImage = s.portraitImage,
+                        canvasGroup = s.canvasGroup,
+                        animator = s.animator,
+                        defaultPosition = s.defaultPosition
+                    });
+                }
             }
         }
 
@@ -121,7 +133,26 @@ namespace Runtime.Dialogue.Plugins.Portraits
 
                 slot.defaultPosition = slot.portraitImage.rectTransform.anchoredPosition;
 
-                if (transferCurrentState && snapshots.TryGetValue(slot.positionID, out var state))
+                bool hasSnapshot = false;
+                (Sprite sprite, float alpha, bool active, RuntimeAnimatorController controller) state = default;
+
+                if (transferCurrentState)
+                {
+                    if (snapshots.TryGetValue(slot.positionID, out state))
+                    {
+                        hasSnapshot = true;
+                    }
+                    else
+                    {
+                        string norm = NormalizePosition(slot.positionID);
+                        if (!string.IsNullOrEmpty(norm) && snapshots.TryGetValue(norm, out state))
+                        {
+                            hasSnapshot = true;
+                        }
+                    }
+                }
+
+                if (hasSnapshot)
                 {
                     slot.portraitImage.sprite = state.sprite;
                     if (state.active && state.sprite != null && state.alpha > 0f)

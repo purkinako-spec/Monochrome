@@ -295,14 +295,16 @@ namespace Monochrome.Core.Dialogue
 
         private void OnDestroy()
         {
-            if (DialogueLocalizationManager.Instance != null)
+            var loc = DialogueLocalizationManager.Instance;
+            if (loc != null)
             {
-                DialogueLocalizationManager.Instance.OnLanguageChanged -= HandleLanguageChanged;
+                loc.OnLanguageChanged -= HandleLanguageChanged;
             }
 
-            if (InputDeviceManager.Instance != null)
+            var input = InputDeviceManager.Instance;
+            if (input != null)
             {
-                InputDeviceManager.Instance.OnDeviceChanged -= HandleDeviceChanged;
+                input.OnDeviceChanged -= HandleDeviceChanged;
             }
 
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= HandleSceneLoaded;

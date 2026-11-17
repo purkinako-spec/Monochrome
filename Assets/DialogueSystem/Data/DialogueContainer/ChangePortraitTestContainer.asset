@@ -14,38 +14,49 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Runtime.Dialogue.Core.DialogueContainer
   startNodeID: Node_dff6f
   allNodes:
+  - graphPosition: {x: 485, y: 100}
+    nextNodeID: 
+    nodeID: Node_99e57
+    speakerName: aaaa
+    dialogueText: '[layout:name=Default]vvvvvv'
+    choices:
+    - choiceText: a
+      targetNodeID: Node_45728
+      branchType: PrefabUIBranchHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
+    - choiceText: b
+      targetNodeID: Node_e4e3f
+      branchType: PrefabUIBranchHandler
+      conditionKey: 
+      conditionOperator: 0
+      conditionValue: 0
   - graphPosition: {x: 100, y: 100}
     nextNodeID: Node_99e57
     nodeID: Node_dff6f
     speakerName: dd
-    dialogueText: '[dialogue_fade:type=in,time=0.5][layout:name=Telephone]
+    dialogueText: '[layout:name=Telephone]
 
-
-      [portrait:target=???,exp=default,pos=Icon]
+      [dialogue_fade:type=in,time=0.5]
 
       [portrait:target=???,exp=default,pos=Icon]'
     choices: []
-  - graphPosition: {x: 1061, y: 100}
+  - graphPosition: {x: 982, y: 390}
+    nextNodeID: Node_17cb6
+    nodeID: Node_e4e3f
+    speakerName: 
+    dialogueText: '[layout:name=Telephone]'
+    choices: []
+  - graphPosition: {x: 1486, y: 100}
     nextNodeID: 
     nodeID: Node_45728
     speakerName: dfae
     dialogueText: '[end_dialogue:fade=0.5]'
     choices: []
-  - graphPosition: {x: 485, y: 100}
-    nextNodeID: 
-    nodeID: Node_99e57
-    speakerName: aaaa
-    dialogueText: vvvvvv
-    choices:
-    - choiceText: a
-      targetNodeID: Node_45728
-      branchType: DefaultChoiceHandler
-      conditionKey: 
-      conditionOperator: 0
-      conditionValue: 0
-    - choiceText: b
-      targetNodeID: Node_45728
-      branchType: DefaultChoiceHandler
-      conditionKey: 
-      conditionOperator: 0
-      conditionValue: 0
+  - graphPosition: {x: 1302, y: 390}
+    nextNodeID: Node_45728
+    nodeID: Node_17cb6
+    speakerName: 
+    dialogueText: '[portrait:target=???,exp=default,pos=Icon]'
+    choices: []

@@ -23,17 +23,26 @@ namespace Runtime.Dialogue.Logic
         public string CurrentSpeaker => currentNode != null ? currentNode.speakerName : string.Empty;
 
         private static DialogueManager instance;
+        private static bool isQuitting = false;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
         {
             instance = null;
+            isQuitting = false;
         }
+
+        /// <summary>
+        /// インスタンスが既に存在し、かつ終了処理中でないかどうか（自動生成を行わずに確認する場合に使用）
+        /// </summary>
+        public static bool HasInstance => !isQuitting && instance != null && instance;
 
         public static DialogueManager Instance
         {
             get
             {
+                if (isQuitting) return null;
+
                 if (instance == null || !instance)
                 {
                     instance = FindFirstObjectByType<DialogueManager>();
@@ -132,6 +141,19 @@ namespace Runtime.Dialogue.Logic
             }
 
             ResolveDefaultView();
+        }
+
+        private void OnApplicationQuit()
+        {
+            isQuitting = true;
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
+            }
         }
 
         private void Start()
