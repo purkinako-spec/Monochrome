@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace DialogueSystem.Editor
     {
         private const string SavePath = "Assets/DialogueSystem/Data/DialogueContainer/EffectCommandTest.asset";
 
-        [MenuItem("Dialogue/Create Effect Test Container")]
+        [MenuItem("Tools/Dialogue/Create Effect Test Container")]
         public static void CreateEffectTestContainer()
         {
             // 既存アセットがあれば上書き確認なしで削除

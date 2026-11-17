@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -10,7 +10,7 @@ namespace Runtime.Dialogue.Editor
 {
     public static class DialogueLauncherUIPrefabCreator
     {
-        [MenuItem("Tools/Monochrome/Create DialogueLauncherUI Prefab")]
+        [MenuItem("Tools/Dialogue/Create DialogueLauncherUI Prefab")]
         [InitializeOnLoadMethod]
         public static void CreatePrefab()
         {
