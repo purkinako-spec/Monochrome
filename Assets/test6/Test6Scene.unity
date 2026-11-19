@@ -1115,7 +1115,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 661933341258016803, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 135
+      value: 134
       objectReference: {fileID: 0}
     - target: {fileID: 661933341258016803, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1187,11 +1187,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1436208953393113750, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: initialFlags.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1436208953393113750, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: initialFlags.Array.data[1].key
       value: area1_npc1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1436208953393113750, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: initialFlags.Array.data[2].key
+      value: fan
       objectReference: {fileID: 0}
     - target: {fileID: 1436208953393113750, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: initialFlags.Array.data[1].value
@@ -1497,6 +1501,10 @@ PrefabInstance:
       propertyPath: dialogueView
       value: 
       objectReference: {fileID: 987906252}
+    - target: {fileID: 7724967668841137240, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
+      propertyPath: m_SortingOrder
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 7807668273551901627, guid: 5d41256e64d3d6a408092c52c4419709, type: 3}
       propertyPath: m_Name
       value: Dialogue
@@ -1816,7 +1824,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1024438979
 Transform:
   m_ObjectHideFlags: 0
@@ -1926,7 +1934,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: -0.000061035156}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1160775453
 MonoBehaviour:
@@ -2000,7 +2008,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -480, y: -330}
+  m_AnchoredPosition: {x: -471.22562, y: -330.60718}
   m_SizeDelta: {x: 256, y: 256}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1221019559
@@ -2413,11 +2421,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5505715960570830892, guid: 3f8e9d0a1b2c4567890123456789abcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -200
+      value: -212.63629
       objectReference: {fileID: 0}
     - target: {fileID: 5505715960570830892, guid: 3f8e9d0a1b2c4567890123456789abcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6210293842548902318, guid: 3f8e9d0a1b2c4567890123456789abcd, type: 3}
       propertyPath: m_AnchorMax.y
@@ -2677,7 +2685,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.14, y: 0.03}
+  m_Size: {x: 0.36, y: 0.08}
   m_EdgeRadius: 0
 --- !u!50 &1372264789
 Rigidbody2D:
@@ -2991,7 +2999,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.12, y: 0.04}
+  m_Size: {x: 0.36, y: 0.13}
   m_EdgeRadius: 0
 --- !u!212 &1573472087
 SpriteRenderer:
