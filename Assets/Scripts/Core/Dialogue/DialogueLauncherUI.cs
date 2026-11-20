@@ -957,7 +957,11 @@ namespace Monochrome.Core.Dialogue
                 }
 
                 // マウスホイールでのスクロール（ホイール上=上移動、ホイール下=下移動）
+#if ENABLE_INPUT_SYSTEM
+                float wheel = Mouse.current != null ? Mouse.current.scroll.ReadValue().y : 0f;
+#else
                 float wheel = UnityEngine.Input.mouseScrollDelta.y;
+#endif
                 if (wheel > 0.2f)
                 {
                     MoveUp();
@@ -1418,8 +1422,11 @@ namespace Monochrome.Core.Dialogue
                 if (gp.dpad.up.isPressed || gp.leftStick.up.isPressed) return 1f;
                 if (gp.dpad.down.isPressed || gp.leftStick.down.isPressed) return -1f;
             }
-#endif
+
+            return 0f;
+#else
             return UnityEngine.Input.GetAxisRaw("Vertical");
+#endif
         }
 
         private bool CheckSubmitInput()
@@ -1444,8 +1451,11 @@ namespace Monochrome.Core.Dialogue
             {
                 return true;
             }
-#endif
+
+            return false;
+#else
             return UnityEngine.Input.GetKeyDown(KeyCode.Return) || UnityEngine.Input.GetKeyDown(KeyCode.Space);
+#endif
         }
 
         private bool CheckCancelInput()
@@ -1467,8 +1477,11 @@ namespace Monochrome.Core.Dialogue
             {
                 return true;
             }
-#endif
+
+            return false;
+#else
             return UnityEngine.Input.GetKeyDown(KeyCode.Escape);
+#endif
         }
     }
 }

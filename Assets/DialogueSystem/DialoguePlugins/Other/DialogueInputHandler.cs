@@ -18,10 +18,34 @@ namespace Runtime.Dialogue
         [Header("References")]
         [SerializeField] private DialogueViewWindow dialogueView;
 
+        [Header("Input Actions (任意・リバインド対応)")]
+        [Tooltip("会話送りアクション（未設定時はSpace/Enter/Fキー/マウスクリック/ゲームパッド南ボタンで動作）")]
+        [SerializeField] private InputActionReference advanceAction;
+
+        [Tooltip("オートモード切替アクション（未設定時はAキー/ゲームパッド西ボタンで動作）")]
+        [SerializeField] private InputActionReference autoModeAction;
+
+        [Tooltip("スキップモード切替アクション（未設定時はSキー/ゲームパッド北ボタンで動作）")]
+        [SerializeField] private InputActionReference skipModeAction;
+
         private float startInputCooldown = 0f;
         private DialogueState prevState = DialogueState.Idle;
 
         private DialogueViewWindow ActiveView => (DialogueManager.Instance?.CurrentView as DialogueViewWindow) ?? dialogueView;
+
+        private void OnEnable()
+        {
+            if (advanceAction != null && advanceAction.action != null) advanceAction.action.Enable();
+            if (autoModeAction != null && autoModeAction.action != null) autoModeAction.action.Enable();
+            if (skipModeAction != null && skipModeAction.action != null) skipModeAction.action.Enable();
+        }
+
+        private void OnDisable()
+        {
+            if (advanceAction != null && advanceAction.action != null) advanceAction.action.Disable();
+            if (autoModeAction != null && autoModeAction.action != null) autoModeAction.action.Disable();
+            if (skipModeAction != null && skipModeAction.action != null) skipModeAction.action.Disable();
+        }
 
         private void Awake()
         {
@@ -52,21 +76,24 @@ namespace Runtime.Dialogue
                 return;
             }
 
-            // --- 入力判定 (New Input System) ---
+            // --- 入力判定 (New Input System / Gamepad / Keyboard / Mouse) ---
+            bool isActionTriggered = advanceAction != null && advanceAction.action != null && advanceAction.action.WasPressedThisFrame();
+
             // 1. マウスクリック
             bool isMousePressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
 
-            // 2. キーボード（Space, Enter, テンキーEnter）
+            // 2. キーボード（Space, Enter, テンキーEnter, Fキー）
             bool isStandardKeyboard = Keyboard.current != null && (
                 Keyboard.current.spaceKey.wasPressedThisFrame ||
                 Keyboard.current.enterKey.wasPressedThisFrame ||
-                Keyboard.current.numpadEnterKey.wasPressedThisFrame
+                Keyboard.current.numpadEnterKey.wasPressedThisFrame ||
+                Keyboard.current.fKey.wasPressedThisFrame
             );
 
-            // 3. Fキー（インタラクトキーでの送り）
-            bool isFKeyPressed = Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
+            // 3. ゲームパッド（南ボタン: A / ✕）
+            bool isGamepadPressed = Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame;
 
-            if (isMousePressed || isStandardKeyboard || isFKeyPressed)
+            if (isActionTriggered || isMousePressed || isStandardKeyboard || isGamepadPressed)
             {
                 // 選択肢が表示されている間は、UIへのクリック誤爆を防ぐためガード
                 if (isMousePressed && ActiveView != null && ActiveView.IsShowingChoices)
@@ -80,14 +107,22 @@ namespace Runtime.Dialogue
                 HandleAdvance();
             }
 
-            // 4. オートモード切り替え（Aキー）
-            if (Keyboard.current != null && Keyboard.current.aKey.wasPressedThisFrame)
+            // 4. オートモード切り替え（Action または Aキー / ゲームパッド西ボタン）
+            bool isAutoTriggered = (autoModeAction != null && autoModeAction.action != null && autoModeAction.action.WasPressedThisFrame())
+                || (Keyboard.current != null && Keyboard.current.aKey.wasPressedThisFrame)
+                || (Gamepad.current != null && Gamepad.current.buttonWest.wasPressedThisFrame);
+
+            if (isAutoTriggered)
             {
                 DialogueManager.Instance.ToggleAutoMode();
             }
 
-            // 5. スキップモード切り替え（Sキー）
-            if (Keyboard.current != null && Keyboard.current.sKey.wasPressedThisFrame)
+            // 5. スキップモード切り替え（Action または Sキー / ゲームパッド北ボタン）
+            bool isSkipTriggered = (skipModeAction != null && skipModeAction.action != null && skipModeAction.action.WasPressedThisFrame())
+                || (Keyboard.current != null && Keyboard.current.sKey.wasPressedThisFrame)
+                || (Gamepad.current != null && Gamepad.current.buttonNorth.wasPressedThisFrame);
+
+            if (isSkipTriggered)
             {
                 DialogueManager.Instance.ToggleSkipMode();
             }

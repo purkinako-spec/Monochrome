@@ -41,13 +41,31 @@ namespace MiniGame.Fish.Test2
         {
             if (!canInput) return;
 
-            // 新InputSystemのPlayerInput未アタッチ時のフォールバック (キーボードWASD/矢印キー)
+            // 新InputSystemのPlayerInput未アタッチ時のフォールバック (キーボードWASD/矢印キー / パッドスティック)
             Vector2 input = moveInput;
             if (input == Vector2.zero)
             {
-                float h = Input.GetAxisRaw("Horizontal");
-                float v = Input.GetAxisRaw("Vertical");
-                input = new Vector2(h, v).normalized;
+                var kb = Keyboard.current;
+                if (kb != null)
+                {
+                    float h = 0f;
+                    float v = 0f;
+                    if (kb.aKey.isPressed || kb.leftArrowKey.isPressed) h -= 1f;
+                    if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) h += 1f;
+                    if (kb.wKey.isPressed || kb.upArrowKey.isPressed) v += 1f;
+                    if (kb.sKey.isPressed || kb.downArrowKey.isPressed) v -= 1f;
+                    input = new Vector2(h, v).normalized;
+                }
+
+                var gp = Gamepad.current;
+                if (input == Vector2.zero && gp != null)
+                {
+                    input = gp.leftStick.ReadValue();
+                    if (input == Vector2.zero)
+                    {
+                        input = gp.dpad.ReadValue();
+                    }
+                }
             }
 
             // 移動計算

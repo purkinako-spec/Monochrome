@@ -24,7 +24,7 @@ MonoBehaviour:
     nextNodeID: Node_cd479
     nodeID: Node_b13a3
     speakerName: "\u91E3\u308A\u4EBA"
-    dialogueText: "\u305D\u3063\u304B\u3058\u3083\u3042\u306D"
+    dialogueText: "<size=150%>\u305D\u3063\u304B\u3058\u3083\u3042\u306D</size>"
     choices: []
   - graphPosition: {x: 740, y: 320}
     nextNodeID: 

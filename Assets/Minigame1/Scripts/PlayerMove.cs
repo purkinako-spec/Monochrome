@@ -17,17 +17,31 @@ public class PlayerMove : MonoBehaviour
     {
         input = Vector2.zero;
 
-        if (Keyboard.current.aKey.isPressed)
-            input.x = -1;
+        var kb = Keyboard.current;
+        if (kb != null)
+        {
+            if (kb.aKey.isPressed || kb.leftArrowKey.isPressed)
+                input.x -= 1f;
 
-        if (Keyboard.current.dKey.isPressed)
-            input.x = 1;
+            if (kb.dKey.isPressed || kb.rightArrowKey.isPressed)
+                input.x += 1f;
 
-        if (Keyboard.current.wKey.isPressed)
-            input.y = 1;
+            if (kb.wKey.isPressed || kb.upArrowKey.isPressed)
+                input.y += 1f;
 
-        if (Keyboard.current.sKey.isPressed)
-            input.y = -1;
+            if (kb.sKey.isPressed || kb.downArrowKey.isPressed)
+                input.y -= 1f;
+        }
+
+        var gp = Gamepad.current;
+        if (input == Vector2.zero && gp != null)
+        {
+            input = gp.leftStick.ReadValue();
+            if (input == Vector2.zero)
+            {
+                input = gp.dpad.ReadValue();
+            }
+        }
     }
 
     private void FixedUpdate()

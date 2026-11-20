@@ -436,9 +436,10 @@ namespace Runtime.Dialogue.Branching
                 if (gp.dpad.down.isPressed || gp.leftStick.down.isPressed) v -= 1f;
             }
 
-            if (Mathf.Abs(v) > 0.1f) return v;
-#endif
+            return v;
+#else
             return Input.GetAxisRaw("Vertical");
+#endif
         }
 
         private bool GetSubmitInput()
@@ -459,8 +460,11 @@ namespace Runtime.Dialogue.Branching
             {
                 if (gp.buttonSouth.wasPressedThisFrame) return true;
             }
-#endif
+
+            return false;
+#else
             return Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.F);
+#endif
         }
 
         private Transform FindRootCanvas()

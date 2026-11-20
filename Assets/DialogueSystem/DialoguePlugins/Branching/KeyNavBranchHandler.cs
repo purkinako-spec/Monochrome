@@ -331,10 +331,10 @@ namespace Runtime.Dialogue.Branching
                 if (gp.dpad.down.isPressed || gp.leftStick.down.isPressed) v -= 1f;
             }
 
-            if (Mathf.Abs(v) > 0.1f) return v;
-#endif
-            // 旧Inputフォールバック
+            return v;
+#else
             return Input.GetAxisRaw("Vertical");
+#endif
         }
 
         private bool GetSubmitInput()
@@ -343,7 +343,9 @@ namespace Runtime.Dialogue.Branching
             var kb = Keyboard.current;
             if (kb != null)
             {
-                if (kb.enterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame || kb.zKey.wasPressedThisFrame)
+                if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame ||
+                    kb.spaceKey.wasPressedThisFrame || kb.fKey.wasPressedThisFrame ||
+                    kb.eKey.wasPressedThisFrame || kb.zKey.wasPressedThisFrame)
                 {
                     return true;
                 }
@@ -354,9 +356,11 @@ namespace Runtime.Dialogue.Branching
             {
                 if (gp.buttonSouth.wasPressedThisFrame) return true; // Aボタン / ✕ボタン
             }
-#endif
-            // 旧Inputフォールバック
+
+            return false;
+#else
             return Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.E) || Input.GetButtonDown("Submit");
+#endif
         }
     }
 }
