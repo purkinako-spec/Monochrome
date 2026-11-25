@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.custom.drawing-system": {
+      "version": "file:C:/Users/G2546/Documents/GitHub/UnityDrawingSystem",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.unity.inputsystem": "1.7.0",
+        "com.unity.ugui": "2.0.0"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "13.0.5",
       "depth": 0,
